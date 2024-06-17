@@ -1,0 +1,14 @@
+version: "3.8"
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "${PORT}:8080"
+    env_file:
+      - .env
+    environment:
+      DB_PORT: ${DB_PORT}
+      GIN_MODE: ${GIN_MODE}
