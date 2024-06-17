@@ -102,6 +102,12 @@ Uma aplicação para gerenciar o aluguel de bicicletas elétricas, onde usuário
 
 
 ## Instalação
+Para usar este projeto, você precisa seguir estas etapas:
+
+1. Clone o repositório: `git clone https://github.com/vinniciusgomes/mybooks-api`
+2. Instale as dependências: `go mod download`
+3. Construa o aplicativo: `go build`
+4. Execute o aplicativo: `go run ./cmd/api/main.go`
 
 ## Rodando
 Existe algumas formas de rodar um projeto em Go, aqui estão duas delas configuradas nesse repositório:
