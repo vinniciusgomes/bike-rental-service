@@ -104,6 +104,7 @@ Uma aplicação para gerenciar o aluguel de bicicletas elétricas, onde usuário
 ## Instalação
 
 ## Rodando
+Existe algumas formas de rodar um projeto em Go, aqui estão duas delas configuradas nesse repositório:
 
 ### Rodando com Air
 Para executar o serviço localmente, você pode usar [Air](https://github.com/cosmtrek/air) para usar o hot reload. Execute o seguinte comando:
