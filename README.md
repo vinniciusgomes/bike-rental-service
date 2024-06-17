@@ -134,7 +134,6 @@ air
 ```
 
 ### Rodando com Docker
-## Docker e Docker Compose
 Este projeto inclui um arquivo `Dockerfile` e `docker-compose.yml` para fácil conteinerização e implantação. Aqui estão os comandos Docker e Docker Compose mais comuns que você pode querer usar:
 
 - `docker build -t your-image-name .`: Construa uma imagem Docker para o projeto. Substitua `your-image-name` por um nome para sua imagem.
