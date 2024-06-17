@@ -106,10 +106,55 @@ Uma aplicação para gerenciar o aluguel de bicicletas elétricas, onde usuário
 ## Rodando
 
 ### Rodando com Air
+Para executar o serviço localmente, você pode usar [Air](https://github.com/cosmtrek/air) para usar o hot reload. Execute o seguinte comando:
+```
+air init
+```
+
+Altere essa linha no arquivo gerado `.air.toml`:
+```
+cmd = "go build -o ./tmp/main ."
+``` 
+
+Para:
+```
+  cmd = "go build -o ./tmp/main ./cmd/api/main.go"
+```
+
+Rode para iniciar:
+```
+air
+```
 
 ### Rodando com Docker
+## Docker e Docker Compose
+Este projeto inclui um arquivo `Dockerfile` e `docker-compose.yml` para fácil conteinerização e implantação. Aqui estão os comandos Docker e Docker Compose mais comuns que você pode querer usar:
+
+- `docker build -t your-image-name .`: Construa uma imagem Docker para o projeto. Substitua `your-image-name` por um nome para sua imagem.
+- `docker run -p 8080:8080 -e PORT=8080 your-image-name`: Execute um contêiner com base na imagem construída. Substitua `your-image-name` pelo nome que você usou ao construir a imagem. Você pode alterar o número da porta, se necessário.
+
+Se você quiser usar o Docker Compose, siga estes comandos:
+
+- `docker compose build`: Construa os serviços definidos no arquivo `docker-compose.yml`.
+- `docker compose up`: Execute os serviços definidos no arquivo `docker-compose.yml`.
+
+Para parar e remover contêineres, redes e volumes definidos no arquivo `docker-compose.yml`, execute:
+
+```sh
+docker-compose down
+```
+
+Para obter mais informações sobre Docker e Docker Compose, consulte a documentação oficial:
+
+- [Docker](https://docs.docker.com/)
+- [Docker Compose](https://docs.docker.com/compose/)
 
 ## O que foi usado
+Este projeto utiliza as seguintes ferramentas:
+
+- [Golang](https://golang.org/) para desenvolvimento back-end
+- [Go-Gin](https://github.com/gin-gonic/gin) para gerenciamento de rotas
+- [GoORM](https://gorm.io/) para comunicação com banco de dados
 
 ## Contribuição
 
