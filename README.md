@@ -67,32 +67,32 @@ Uma aplicação para gerenciar o aluguel de bicicletas elétricas, onde usuário
 - `POST /v1/auth/login`: Autenticar um usuário.
 - `POST /v1/auth/logout`: Deslogar um usuário.
 
-#### Gerenciamento de Usuários:
+#### Gerenciamento de usuários:
 - `GET /v1/users/{id}`: Obter detalhes de um usuário.
 - `PUT /v1/users/{id}`: Atualizar detalhes de um usuário.
 - `GET /v1/users/{id}/rentals`: Obter histórico de aluguéis de um usuário.
 
-#### Gerenciamento de Bicicletas:
+#### Gerenciamento de bicicletas:
 - `POST /v1/admin/bikes`: Adicionar uma nova bicicleta.
 - `GET /v1/bikes`: Listar todas as bicicletas.
 - `GET /v1/bikes/{id}`: Obter detalhes de uma bicicleta.
 - `PUT /v1/bikes/{id}`: Atualizar detalhes de uma bicicleta.
 - `DELETE /v1/bikes/{id}`: Remover uma bicicleta.
 
-#### Reservas e Aluguéis:
+#### Reservas e aluguéis:
 - `POST /v1/bikes/{id}/reserve`: Reservar uma bicicleta.
 - `POST /v1/bikes/{id}/rent`: Iniciar o aluguel de uma bicicleta.
 - `POST /v1/bikes/{id}/return`: Finalizar o aluguel de uma bicicleta.
 
-#### Avaliações e Feedback:
+#### Avaliações e feedback:
 - `POST /v1/bikes/{id}/review`: Avaliar uma bicicleta.
 - `GET /v1/bikes/{id}/reviews`: Obter avaliações de uma bicicleta.
 
-#### Relatórios e Estatísticas:
+#### Relatórios e estatísticas:
 - `GET /v1/admin/reports`: Obter relatórios de uso.
 - `GET /v1/admin/statistics`: Obter estatísticas de aluguéis.
 
-### Persistência de Dados:
+### Persistência de dados:
 - Banco de dados relacional: `PostgreSQL`.
 - Tabelas sugeridas: `users`, `bikes`, `rentals`, `reviews`, `maintenance_logs`.
 
