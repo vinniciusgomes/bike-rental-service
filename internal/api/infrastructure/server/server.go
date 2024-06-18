@@ -7,6 +7,10 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
+	"github.com/vinniciusgomes/ebike-rental-service/internal/api/domain/repositories"
+	"github.com/vinniciusgomes/ebike-rental-service/internal/api/domain/services"
+	"github.com/vinniciusgomes/ebike-rental-service/internal/api/infrastructure/config"
+	"github.com/vinniciusgomes/ebike-rental-service/internal/api/infrastructure/server/handlers"
 	"github.com/vinniciusgomes/ebike-rental-service/internal/api/infrastructure/server/middlewares"
 )
 
@@ -20,18 +24,41 @@ import (
 // Returns an error if there was a problem loading the .env file or starting
 // the server.
 func StartServer() error {
+	// Check if .env file exists
 	if _, err := os.Stat(".env"); err == nil {
 		if err := godotenv.Load(); err != nil {
 			log.Fatal("Error loading .env file")
 		}
 	}
 
+	// Database
+	config.DatabaseInit()
+	gorm := config.GetDatabaseInstance()
+	dbGorm, err := gorm.DB()
+	if err != nil {
+		return err
+	}
+
+	err = dbGorm.Ping()
+	if err != nil {
+		panic(err)
+	}
+
+	defer dbGorm.Close()
+
+	// Init router
 	router := gin.Default()
+
+	// Services
+	authService := services.NewAuthService(repositories.NewAuthRepository(config.GetDatabaseInstance()))
 
 	// Middleware
 	router.Use(gin.Logger())
 	router.Use(gin.Recovery())
 	router.Use(middlewares.CORSMiddleware())
+
+	// Routes
+	handlers.AuthHandler(router, authService)
 
 	// Others routes
 	router.GET("/health", func(c *gin.Context) {
