@@ -42,12 +42,12 @@ func (s *AuthService) CreateUser(c *gin.Context) {
 
 	id, err := uuid.NewRandom()
 	if err != nil {
-		helpers.HandleError(c, err, http.StatusInternalServerError)
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "an error occurred when trying to create user"})
 		return
 	}
 
 	if err := c.BindJSON(user); err != nil {
-		helpers.HandleError(c, err, http.StatusBadRequest)
+		c.JSON(http.StatusBadRequest, gin.H{"message": "failed to create user"})
 		return
 	}
 
@@ -57,13 +57,13 @@ func (s *AuthService) CreateUser(c *gin.Context) {
 	user.Verified = false
 
 	if err = helpers.ValidateModel(user); err != nil {
-		helpers.HandleError(c, err, http.StatusUnprocessableEntity)
+		c.JSON(http.StatusUnprocessableEntity, gin.H{"message": err.Error()})
 		return
 	}
 
 	hash, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
 	if err != nil {
-		helpers.HandleError(c, err, http.StatusInternalServerError)
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "an error occurred when trying to create user"})
 		return
 	}
 
@@ -71,11 +71,11 @@ func (s *AuthService) CreateUser(c *gin.Context) {
 
 	if err = s.repo.CreateUser(user); err != nil {
 		if err.Error() == "ERROR: duplicate key value violates unique constraint \"uni_user_models_email\" (SQLSTATE 23505)" {
-			helpers.HandleError(c, errors.New("user with email already exists"), http.StatusConflict)
+			c.JSON(http.StatusConflict, gin.H{"message": "user with email already exists"})
 			return
 		}
 
-		helpers.HandleError(c, err, http.StatusInternalServerError)
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "an error occurred when trying to create user"})
 		return
 	}
 
@@ -95,28 +95,27 @@ func (s *AuthService) Login(c *gin.Context) {
 	}
 
 	if err := c.BindJSON(&body); err != nil {
-		helpers.HandleError(c, errors.New("invalid email or password"), http.StatusBadRequest)
+		c.JSON(http.StatusBadRequest, gin.H{"message": "invalid email or password"})
 		return
 	}
 
 	if err := helpers.ValidateModel(&body); err != nil {
-		helpers.HandleError(c, err, http.StatusUnprocessableEntity)
+		c.JSON(http.StatusUnprocessableEntity, gin.H{"message": err.Error()})
 		return
 	}
 
 	user, err := s.repo.GetUserByEmail(body.Email)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			helpers.HandleError(c, errors.New("invalid email or password"), http.StatusUnauthorized)
+			c.JSON(http.StatusUnauthorized, gin.H{"message": "invalid email or password"})
 			return
 		}
-
-		helpers.HandleError(c, err, http.StatusInternalServerError)
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "an error occurred when trying to log in"})
 		return
 	}
 
 	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(body.Password)); err != nil {
-		helpers.HandleError(c, errors.New("invalid email or password"), http.StatusUnauthorized)
+		c.JSON(http.StatusUnauthorized, gin.H{"message": "invalid email or password"})
 		return
 	}
 
@@ -127,12 +126,23 @@ func (s *AuthService) Login(c *gin.Context) {
 
 	tokenString, err := token.SignedString([]byte(os.Getenv("JWT_SECRET")))
 	if err != nil {
-		helpers.HandleError(c, err, http.StatusInternalServerError)
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "an error occurred when trying to log in"})
 		return
 	}
 
 	c.SetSameSite(http.SameSiteLaxMode)
 	c.SetCookie(constants.AuthCookieName, tokenString, 3600*24*7, "", "", false, true)
 
+	c.Status(http.StatusOK)
+}
+
+// Logout handles the logout functionality for the AuthService.
+//
+// Parameters:
+// - c: a pointer to the gin.Context object for handling HTTP request and response.
+//
+// Returns: void
+func (s *AuthService) Logout(c *gin.Context) {
+	c.SetCookie(constants.AuthCookieName, "", -1, "", "", false, true)
 	c.Status(http.StatusOK)
 }

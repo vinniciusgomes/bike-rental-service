@@ -43,19 +43,18 @@ func StartServer() error {
 	if err != nil {
 		panic(err)
 	}
-
 	defer dbGorm.Close()
 
 	// Init router
 	router := gin.Default()
 
-	// Services
-	authService := services.NewAuthService(repositories.NewAuthRepository(config.GetDatabaseInstance()))
-
 	// Middleware
 	router.Use(gin.Logger())
 	router.Use(gin.Recovery())
 	router.Use(middlewares.CORSMiddleware())
+
+	// Services
+	authService := services.NewAuthService(repositories.NewAuthRepository(config.GetDatabaseInstance()))
 
 	// Routes
 	handlers.AuthHandler(router, authService)

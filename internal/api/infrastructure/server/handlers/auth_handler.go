@@ -19,6 +19,7 @@ func AuthHandler(router *gin.Engine, authService *services.AuthService) {
 		{
 			authRouter.POST("/register", authService.CreateUser)
 			authRouter.POST("/login", authService.Login)
+			authRouter.POST("/logout", authService.Logout)
 		}
 	}
 }

@@ -63,9 +63,9 @@ Uma aplicação para gerenciar o aluguel de bicicletas elétricas, onde usuário
 ## Requisitos técnicos
 ### Endpoints da API:
 #### Autenticação e autorização:
-- `POST /v1/auth/register`: Registrar um novo usuário.
-- `POST /v1/auth/login`: Autenticar um usuário.
-- `POST /v1/auth/logout`: Deslogar um usuário.
+- `POST /v1/auth/register`: Registrar um novo usuário. ✅
+- `POST /v1/auth/login`: Autenticar um usuário. ✅
+- `POST /v1/auth/logout`: Deslogar um usuário. ✅
 
 #### Gerenciamento de usuários:
 - `GET /v1/users/{id}`: Obter detalhes de um usuário.
