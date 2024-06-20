@@ -15,7 +15,7 @@ var e error
 
 // GetDatabase initializes a connection to the PostgreSQL database specified by the
 // "DATABASE_URL" environment variable and performs automatic migration of the
-// "UserModel" model.
+// "User" model.
 //
 // It does not take any parameters.
 // It does not return anything.
@@ -27,7 +27,7 @@ func DatabaseInit() {
 		panic(e)
 	}
 
-	database.AutoMigrate(&models.ValidationToken{}, &models.UserModel{})
+	database.AutoMigrate(&models.ValidationToken{}, &models.User{})
 }
 
 // GetDatabaseInstance returns the database instance.

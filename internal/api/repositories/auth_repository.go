@@ -6,8 +6,8 @@ import (
 )
 
 type AuthRepository interface {
-	CreateUser(user *models.UserModel) error
-	GetUserByEmail(email string) (*models.UserModel, error)
+	CreateUser(user *models.User) error
+	GetUserByEmail(email string) (*models.User, error)
 }
 
 type authRepositoryImp struct {
@@ -30,11 +30,11 @@ func NewAuthRepository(db *gorm.DB) AuthRepository {
 // CreateUser creates a new user in the database.
 //
 // Parameters:
-// - user: a pointer to a UserModel object representing the user to be created.
+// - user: a pointer to a User object representing the user to be created.
 //
 // Returns:
 // - error: an error if there was a problem creating the user, or nil if the user was created successfully.
-func (r *authRepositoryImp) CreateUser(user *models.UserModel) error {
+func (r *authRepositoryImp) CreateUser(user *models.User) error {
 	if err := r.db.Create(user).Error; err != nil {
 
 		return err
@@ -49,10 +49,10 @@ func (r *authRepositoryImp) CreateUser(user *models.UserModel) error {
 // - email: the email of the user to retrieve.
 //
 // Returns:
-// - *models.UserModel: a pointer to the retrieved user model.
+// - *models.User: a pointer to the retrieved user model.
 // - error: an error if the user retrieval fails.
-func (r *authRepositoryImp) GetUserByEmail(email string) (*models.UserModel, error) {
-	var user models.UserModel
+func (r *authRepositoryImp) GetUserByEmail(email string) (*models.User, error) {
+	var user models.User
 
 	if err := r.db.Where("email = ?", email).First(&user).Error; err != nil {
 		return nil, err

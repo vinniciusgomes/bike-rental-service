@@ -38,7 +38,7 @@ func NewAuthService(repo repositories.AuthRepository) *AuthService {
 // - c: a pointer to the gin.Context object for handling HTTP request and response.
 // Return type: void
 func (s *AuthService) CreateUser(c *gin.Context) {
-	user := new(models.UserModel)
+	user := new(models.User)
 
 	id, err := uuid.NewRandom()
 	if err != nil {
