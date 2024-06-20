@@ -3,13 +3,18 @@ package services
 import (
 	"errors"
 	"net/http"
+	"os"
+	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
-	"github.com/vinniciusgomes/ebike-rental-service/internal/api/domain/models"
-	"github.com/vinniciusgomes/ebike-rental-service/internal/api/domain/repositories"
+	"github.com/vinniciusgomes/ebike-rental-service/internal/api/infrastructure/constants"
 	"github.com/vinniciusgomes/ebike-rental-service/internal/api/infrastructure/helpers"
+	"github.com/vinniciusgomes/ebike-rental-service/internal/api/models"
+	"github.com/vinniciusgomes/ebike-rental-service/internal/api/repositories"
 	"golang.org/x/crypto/bcrypt"
+	"gorm.io/gorm"
 )
 
 type AuthService struct {
@@ -75,4 +80,59 @@ func (s *AuthService) CreateUser(c *gin.Context) {
 	}
 
 	c.Status(http.StatusCreated)
+}
+
+// Login handles the login functionality for the AuthService.
+//
+// Parameters:
+// - c: a pointer to the gin.Context object for handling HTTP request and response.
+//
+// Returns: void
+func (s *AuthService) Login(c *gin.Context) {
+	var body struct {
+		Email    string `json:"email" validate:"required,email"`
+		Password string `json:"password" validate:"required"`
+	}
+
+	if err := c.BindJSON(&body); err != nil {
+		helpers.HandleError(c, errors.New("invalid email or password"), http.StatusBadRequest)
+		return
+	}
+
+	if err := helpers.ValidateModel(&body); err != nil {
+		helpers.HandleError(c, err, http.StatusUnprocessableEntity)
+		return
+	}
+
+	user, err := s.repo.GetUserByEmail(body.Email)
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			helpers.HandleError(c, errors.New("invalid email or password"), http.StatusUnauthorized)
+			return
+		}
+
+		helpers.HandleError(c, err, http.StatusInternalServerError)
+		return
+	}
+
+	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(body.Password)); err != nil {
+		helpers.HandleError(c, errors.New("invalid email or password"), http.StatusUnauthorized)
+		return
+	}
+
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+		"sub": user.ID,
+		"exp": time.Now().Add(time.Hour * 24 * 7).Unix(),
+	})
+
+	tokenString, err := token.SignedString([]byte(os.Getenv("JWT_SECRET")))
+	if err != nil {
+		helpers.HandleError(c, err, http.StatusInternalServerError)
+		return
+	}
+
+	c.SetSameSite(http.SameSiteLaxMode)
+	c.SetCookie(constants.AuthCookieName, tokenString, 3600*24*7, "", "", false, true)
+
+	c.Status(http.StatusOK)
 }

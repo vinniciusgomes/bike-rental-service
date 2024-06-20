@@ -1,12 +1,13 @@
 package repositories
 
 import (
-	"github.com/vinniciusgomes/ebike-rental-service/internal/api/domain/models"
+	"github.com/vinniciusgomes/ebike-rental-service/internal/api/models"
 	"gorm.io/gorm"
 )
 
 type AuthRepository interface {
 	CreateUser(user *models.UserModel) error
+	GetUserByEmail(email string) (*models.UserModel, error)
 }
 
 type authRepositoryImp struct {
@@ -40,4 +41,22 @@ func (r *authRepositoryImp) CreateUser(user *models.UserModel) error {
 	}
 
 	return nil
+}
+
+// GetUserByEmail retrieves a user from the database based on their email.
+//
+// Parameters:
+// - email: the email of the user to retrieve.
+//
+// Returns:
+// - *models.UserModel: a pointer to the retrieved user model.
+// - error: an error if the user retrieval fails.
+func (r *authRepositoryImp) GetUserByEmail(email string) (*models.UserModel, error) {
+	var user models.UserModel
+
+	if err := r.db.Where("email = ?", email).First(&user).Error; err != nil {
+		return nil, err
+	}
+
+	return &user, nil
 }

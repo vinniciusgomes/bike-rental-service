@@ -2,7 +2,7 @@ package handlers
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/vinniciusgomes/ebike-rental-service/internal/api/domain/services"
+	"github.com/vinniciusgomes/ebike-rental-service/internal/api/services"
 )
 
 // AuthHandler registers the auth handler with the provided gin.Engine and services.AuthService.
@@ -18,6 +18,7 @@ func AuthHandler(router *gin.Engine, authService *services.AuthService) {
 		authRouter := v1.Group("/auth")
 		{
 			authRouter.POST("/register", authService.CreateUser)
+			authRouter.POST("/login", authService.Login)
 		}
 	}
 }

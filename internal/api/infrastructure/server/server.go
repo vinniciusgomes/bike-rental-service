@@ -7,11 +7,11 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
-	"github.com/vinniciusgomes/ebike-rental-service/internal/api/domain/repositories"
-	"github.com/vinniciusgomes/ebike-rental-service/internal/api/domain/services"
 	"github.com/vinniciusgomes/ebike-rental-service/internal/api/infrastructure/config"
 	"github.com/vinniciusgomes/ebike-rental-service/internal/api/infrastructure/server/handlers"
 	"github.com/vinniciusgomes/ebike-rental-service/internal/api/infrastructure/server/middlewares"
+	"github.com/vinniciusgomes/ebike-rental-service/internal/api/repositories"
+	"github.com/vinniciusgomes/ebike-rental-service/internal/api/services"
 )
 
 // StartServer starts the server with the provided configuration.

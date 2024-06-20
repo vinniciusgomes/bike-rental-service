@@ -3,7 +3,7 @@ package config
 import (
 	"os"
 
-	"github.com/vinniciusgomes/ebike-rental-service/internal/api/domain/models"
+	"github.com/vinniciusgomes/ebike-rental-service/internal/api/models"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
