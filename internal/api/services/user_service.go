@@ -2,6 +2,7 @@ package services
 
 import (
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -21,7 +22,7 @@ type UserResponseDTO struct {
 	Name      string    `json:"name"`
 	Status    string    `json:"status"`
 	Role      string    `json:"role"`
-	Image     *string   `json:"image"`
+	Image     string    `json:"image"`
 	Verified  bool      `json:"verified"`
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
@@ -35,6 +36,62 @@ func NewUserService(repo repositories.UserRepository) *UserService {
 	return &UserService{
 		repo: repo,
 	}
+}
+
+// GetAllUsers retrieves users based on specified filters from the request query parameters.
+//
+// Parameters:
+// - c: a pointer to the gin.Context object for handling HTTP request and response.
+//
+// Returns:
+// This function does not return anything. It sends a JSON response with the user information if successful or an error response if an error occurs.
+func (s *UserService) GetAllUsers(c *gin.Context) {
+	filters := make(map[string]interface{})
+
+	if id := strings.TrimSpace(c.Query("id")); id != "" {
+		filters["id"] = id
+	} else if email := strings.TrimSpace(c.Query("email")); email != "" {
+		filters["email"] = email
+	} else if name := strings.TrimSpace(c.Query("name")); name != "" {
+		filters["name"] = name
+	} else if status := strings.TrimSpace(c.Query("status")); status != "" {
+		if status != models.UserStatusActive && status != models.UserStatusInactive {
+			c.JSON(http.StatusBadRequest, gin.H{"message": "invalid status"})
+			return
+		}
+
+		filters["status"] = status
+	} else if role := strings.TrimSpace(c.Query("role")); role != "" {
+		if role != models.UserRoleAdmin && role != models.UserRoleDefault {
+			c.JSON(http.StatusBadRequest, gin.H{"message": "invalid role"})
+			return
+		}
+
+		filters["role"] = role
+	}
+
+	users, err := s.repo.GetAllUsers(filters)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "an error occurred when trying to get users"})
+		return
+	}
+
+	response := []UserResponseDTO{}
+	for _, user := range *users {
+		response = append(response, UserResponseDTO{
+			ID:        user.ID,
+			Email:     user.Email,
+			Name:      user.Name,
+			Status:    user.Status,
+			Role:      user.Role,
+			Image:     user.Image,
+			Verified:  user.Verified,
+			CreatedAt: user.CreatedAt,
+			UpdatedAt: user.UpdatedAt,
+		})
+	}
+
+	c.JSON(http.StatusOK, response)
 }
 
 // GetUserByID retrieves a user by their ID.

@@ -11,12 +11,22 @@ import (
 // Parameters:
 // - router: a pointer to a gin.Engine object representing the HTTP router.
 // - UserService: a pointer to a services.UserService object providing the user-related operations.
-func UserHandler(router *gin.Engine, UserService *services.UserService) {
+func UserHandler(router *gin.Engine, userService *services.UserService) {
 	v1 := router.Group("/v1")
 	{
 		userRouter := v1.Group("/users")
+		userRouter.Use(middlewares.AuthMiddleware())
 		{
-			userRouter.GET("/:id", middlewares.AuthMiddleware(), UserService.GetUserByID)
+			userRouter.GET("/:id", userService.GetUserByID)
+		}
+	}
+
+	adminGroup := router.Group("/v1/admin")
+	adminGroup.Use(middlewares.AuthMiddleware(), middlewares.AdminOnly())
+	{
+		adminUserRouter := adminGroup.Group("/users")
+		{
+			adminUserRouter.GET("", userService.GetAllUsers)
 		}
 	}
 }

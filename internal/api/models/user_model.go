@@ -22,7 +22,7 @@ type User struct {
 	Name      string         `json:"name" gorm:"not null;size:100;" validate:"required,min=1,max=100"`
 	Status    string         `json:"status" gorm:"not null;default:'active'" validate:"required,oneof='active' 'inactive'"`
 	Role      string         `json:"role" gorm:"not null;default:'user'" validate:"required,oneof='admin' 'user'"`
-	Image     *string        `json:"image" gorm:"size:500;"`
+	Image     string         `json:"image" gorm:"size:500;"`
 	Verified  bool           `json:"verified" gorm:"not null;default:false"`
 	CreatedAt time.Time      `json:"created_at" gorm:"autoCreateTime"`
 	UpdatedAt time.Time      `json:"updated_at" gorm:"autoUpdateTime"`

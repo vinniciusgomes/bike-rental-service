@@ -68,6 +68,7 @@ Uma aplicação para gerenciar o aluguel de bicicletas elétricas, onde usuário
 - `POST /v1/auth/logout`: Deslogar um usuário. ✅
 
 #### Gerenciamento de usuários:
+- `GET /v1/admin/users`: Obter detalhes de todos os usuários. ✅
 - `GET /v1/users/{id}`: Obter detalhes de um usuário. ✅
 - `PUT /v1/users/{id}`: Atualizar detalhes de um usuário.
 - `GET /v1/users/{id}/rentals`: Obter histórico de aluguéis de um usuário.
