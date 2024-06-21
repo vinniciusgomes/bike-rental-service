@@ -1,0 +1,18 @@
+# Exported from Render on 2024-06-03T12:42:20Z
+services:
+- type: web
+  name: ebike-rental-service
+  runtime: docker
+  repo: https://github.com/vinniciusgomes/ebike-rental-service
+  plan: free
+  envVars:
+  - key: GIN_MODE
+    sync: false
+  - key: DATABASE_URL
+    sync: false
+  - key: JWT_SECRET
+    sync: false
+  region: virginia
+  dockerContext: .
+  dockerfilePath: ./Dockerfile
+version: "1"
