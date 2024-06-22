@@ -6,7 +6,7 @@ Uma aplicação para gerenciar o aluguel de bicicletas elétricas, onde usuário
 - Registro de usuários.
 - Login e logout.
 - Autorização baseada em roles (usuário comum e administrador).
-- Gerenciamento de Usuários:
+- Validar conta do usuário.
 
 #### Gerenciamento de usuário:
 - Editar dados pessoais.
@@ -66,11 +66,14 @@ Uma aplicação para gerenciar o aluguel de bicicletas elétricas, onde usuário
 - `POST /v1/auth/register`: Registrar um novo usuário. ✅
 - `POST /v1/auth/login`: Autenticar um usuário. ✅
 - `POST /v1/auth/logout`: Deslogar um usuário. ✅
+- `POST /v1/auth/verify-account`: Verificar conta de usuário. 
 
 #### Gerenciamento de usuários:
 - `GET /v1/admin/users`: Obter detalhes de todos os usuários. ✅
 - `GET /v1/users/{id}`: Obter detalhes de um usuário. ✅
-- `PUT /v1/users/{id}`: Atualizar detalhes de um usuário.
+- `PUT /v1/users/{id}`: Atualizar detalhes de um usuário. ✅
+- `PUT /v1/users/{id}/password`: Atualizar a senha de um usuário. ✅
+- `PUT /v1/users/{id}/delete`: Deletar a conta de um usuário.
 - `GET /v1/users/{id}/rentals`: Obter histórico de aluguéis de um usuário.
 
 #### Gerenciamento de bicicletas:

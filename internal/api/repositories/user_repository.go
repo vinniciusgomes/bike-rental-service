@@ -10,6 +10,7 @@ import (
 type UserRepository interface {
 	GetAllUsers(filters map[string]interface{}) (*[]models.User, error)
 	GetUserByID(id string) (*models.User, error)
+	UpdateUser(user *models.User) error
 }
 
 type userRepositoryImp struct {
@@ -69,4 +70,25 @@ func (r *userRepositoryImp) GetAllUsers(filters map[string]interface{}) (*[]mode
 	}
 
 	return &users, nil
+}
+
+// UpdateUser updates a user in the database.
+//
+// Parameters:
+// - user: a pointer to a models.User struct representing the user to be updated.
+//
+// Returns:
+// - error: an error if the update operation fails, or if the user is not found.
+func (r *userRepositoryImp) UpdateUser(user *models.User) error {
+	result := r.db.Model(&models.User{}).Where("id = ?", user.ID).Updates(user)
+
+	if result.Error != nil {
+		return result.Error
+	}
+
+	if result.RowsAffected == 0 {
+		return fmt.Errorf("user not found")
+	}
+
+	return nil
 }

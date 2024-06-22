@@ -10,6 +10,7 @@ import (
 	"github.com/vinniciusgomes/ebike-rental-service/internal/api/infrastructure/helpers"
 	"github.com/vinniciusgomes/ebike-rental-service/internal/api/models"
 	"github.com/vinniciusgomes/ebike-rental-service/internal/api/repositories"
+	"golang.org/x/crypto/bcrypt"
 )
 
 type UserService struct {
@@ -20,9 +21,10 @@ type UserResponseDTO struct {
 	ID        uuid.UUID `json:"id"`
 	Email     string    `json:"email"`
 	Name      string    `json:"name"`
+	Phone     string    `json:"phone"`
+	Image     string    `json:"image"`
 	Status    string    `json:"status"`
 	Role      string    `json:"role"`
-	Image     string    `json:"image"`
 	Verified  bool      `json:"verified"`
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
@@ -82,9 +84,10 @@ func (s *UserService) GetAllUsers(c *gin.Context) {
 			ID:        user.ID,
 			Email:     user.Email,
 			Name:      user.Name,
+			Phone:     user.Phone,
+			Image:     user.Image,
 			Status:    user.Status,
 			Role:      user.Role,
-			Image:     user.Image,
 			Verified:  user.Verified,
 			CreatedAt: user.CreatedAt,
 			UpdatedAt: user.UpdatedAt,
@@ -125,13 +128,132 @@ func (s *UserService) GetUserByID(c *gin.Context) {
 		ID:        user.ID,
 		Email:     user.Email,
 		Name:      user.Name,
+		Phone:     user.Phone,
+		Image:     user.Image,
 		Status:    user.Status,
 		Role:      user.Role,
-		Image:     user.Image,
 		Verified:  user.Verified,
 		CreatedAt: user.CreatedAt,
 		UpdatedAt: user.UpdatedAt,
 	}
 
 	c.JSON(http.StatusOK, response)
+}
+
+// UpdateUser updates a user's information.
+//
+// Parameters:
+// - c: The gin.Context object representing the HTTP request and response.
+//
+// Return type: None.
+func (s *UserService) UpdateUser(c *gin.Context) {
+	id := c.Params.ByName("id")
+	loggedUser, err := helpers.GetUserFromContext(c)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "an error occurred when trying to get user"})
+		return
+	}
+
+	if loggedUser.Role != models.UserRoleAdmin && loggedUser.ID.String() != id {
+		c.JSON(http.StatusForbidden, gin.H{"message": "access to this resource is forbidden"})
+		return
+	}
+
+	var body struct {
+		Email string `json:"email" validate:"required,email"`
+		Name  string `json:"name" validate:"required"`
+		Phone string `json:"phone" validate:"required"`
+		Image string `json:"image"`
+	}
+
+	if err := c.BindJSON(&body); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "invalid request body"})
+		return
+	}
+
+	if err := helpers.ValidateModel(&body); err != nil {
+		c.JSON(http.StatusUnprocessableEntity, gin.H{"message": err.Error()})
+		return
+	}
+
+	err = s.repo.UpdateUser(&models.User{
+		ID:    uuid.MustParse(id),
+		Email: body.Email,
+		Name:  body.Name,
+		Phone: body.Phone,
+		Image: body.Image,
+	})
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": err})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "user updated successfully"})
+}
+
+// UpdatePassword updates the user's password.
+//
+// Parameters:
+// - c: The gin.Context object representing the HTTP request and response.
+// Return type: None.
+func (s *UserService) UpdatePassword(c *gin.Context) {
+	id := c.Params.ByName("id")
+	loggedUser, err := helpers.GetUserFromContext(c)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "an error occurred when trying to get user"})
+		return
+	}
+
+	if loggedUser.ID.String() != id {
+		c.JSON(http.StatusForbidden, gin.H{"message": "access to this resource is forbidden"})
+		return
+	}
+
+	var body struct {
+		CurrentPassword string `json:"current_password" validate:"required"`
+		NewPassword     string `json:"password" validate:"required"`
+	}
+
+	if err := c.BindJSON(&body); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "invalid request body"})
+		return
+	}
+
+	if err := helpers.ValidateModel(&body); err != nil {
+		c.JSON(http.StatusUnprocessableEntity, gin.H{"message": err.Error()})
+		return
+	}
+
+	if body.CurrentPassword == body.NewPassword {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "new password cannot be the same as current password"})
+		return
+	}
+
+	user, err := s.repo.GetUserByID(id)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "an error occurred when trying to get user"})
+		return
+	}
+
+	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(body.CurrentPassword)); err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"message": "invalid current password"})
+		return
+	}
+
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(body.NewPassword), bcrypt.DefaultCost)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "an error occurred when trying to update password"})
+		return
+	}
+
+	err = s.repo.UpdateUser(&models.User{
+		ID:       uuid.MustParse(id),
+		Password: string(hashedPassword),
+	})
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "an error occurred when trying to update password"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "password updated successfully"})
 }

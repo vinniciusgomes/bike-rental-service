@@ -20,6 +20,7 @@ type User struct {
 	Email     string         `json:"email" gorm:"unique;not null;size:100;" validate:"required,email"`
 	Password  string         `json:"password" gorm:"not null;size:100;" validate:"required,min=1,max=100"`
 	Name      string         `json:"name" gorm:"not null;size:100;" validate:"required,min=1,max=100"`
+	Phone     string         `json:"phone" gorm:"not null;size:100;"`
 	Status    string         `json:"status" gorm:"not null;default:'active'" validate:"required,oneof='active' 'inactive'"`
 	Role      string         `json:"role" gorm:"not null;default:'user'" validate:"required,oneof='admin' 'user'"`
 	Image     string         `json:"image" gorm:"size:500;"`

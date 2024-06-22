@@ -146,3 +146,6 @@ func (s *AuthService) Logout(c *gin.Context) {
 	c.SetCookie(constants.AuthCookieName, "", -1, "", "", false, true)
 	c.Status(http.StatusOK)
 }
+
+// TODO: add refresh token
+// TODO: add verify account
