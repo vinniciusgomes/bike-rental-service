@@ -11,6 +11,7 @@ type UserRepository interface {
 	GetAllUsers(filters map[string]interface{}) (*[]models.User, error)
 	GetUserByID(id string) (*models.User, error)
 	UpdateUser(user *models.User) error
+	DeleteUser(user *models.User) error
 }
 
 type userRepositoryImp struct {
@@ -91,4 +92,15 @@ func (r *userRepositoryImp) UpdateUser(user *models.User) error {
 	}
 
 	return nil
+}
+
+// DeleteUser deletes a user from the database.
+//
+// Parameters:
+// - user: a pointer to a models.User struct representing the user to be deleted.
+//
+// Returns:
+// - error: an error if the delete operation fails.
+func (r *userRepositoryImp) DeleteUser(user *models.User) error {
+	return r.db.Where("id = ?", user.ID).Delete(&models.User{}).Error
 }

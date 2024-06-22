@@ -20,6 +20,7 @@ func UserHandler(router *gin.Engine, userService *services.UserService) {
 			userRouter.GET("/:id", userService.GetUserByID)
 			userRouter.PUT("/:id", userService.UpdateUser)
 			userRouter.PUT("/:id/password", userService.UpdatePassword)
+			userRouter.DELETE("/:id/delete", userService.DeleteUser)
 		}
 	}
 

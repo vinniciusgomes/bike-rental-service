@@ -73,7 +73,7 @@ Uma aplicação para gerenciar o aluguel de bicicletas elétricas, onde usuário
 - `GET /v1/users/{id}`: Obter detalhes de um usuário. ✅
 - `PUT /v1/users/{id}`: Atualizar detalhes de um usuário. ✅
 - `PUT /v1/users/{id}/password`: Atualizar a senha de um usuário. ✅
-- `PUT /v1/users/{id}/delete`: Deletar a conta de um usuário.
+- `DELETE /v1/users/{id}/delete`: Deletar a conta de um usuário. ✅
 - `GET /v1/users/{id}/rentals`: Obter histórico de aluguéis de um usuário.
 
 #### Gerenciamento de bicicletas:

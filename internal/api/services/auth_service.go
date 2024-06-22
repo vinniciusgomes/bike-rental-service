@@ -70,7 +70,7 @@ func (s *AuthService) CreateUser(c *gin.Context) {
 	user.Password = string(hash)
 
 	if err = s.repo.CreateUser(user); err != nil {
-		if err.Error() == "ERROR: duplicate key value violates unique constraint \"uni_user_models_email\" (SQLSTATE 23505)" {
+		if err.Error() == "ERROR: duplicate key value violates unique constraint \"uni_users_email\" (SQLSTATE 23505)" {
 			c.JSON(http.StatusConflict, gin.H{"message": "user with email already exists"})
 			return
 		}

@@ -7,6 +7,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
+	"github.com/vinniciusgomes/ebike-rental-service/internal/api/infrastructure/constants"
 	"github.com/vinniciusgomes/ebike-rental-service/internal/api/infrastructure/helpers"
 	"github.com/vinniciusgomes/ebike-rental-service/internal/api/models"
 	"github.com/vinniciusgomes/ebike-rental-service/internal/api/repositories"
@@ -256,4 +257,34 @@ func (s *UserService) UpdatePassword(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{"message": "password updated successfully"})
+}
+
+// DeleteUser deletes a user from the system.
+//
+// Parameters:
+// - c: The gin.Context object representing the HTTP request and response.
+//
+// Return type: None.
+func (s *UserService) DeleteUser(c *gin.Context) {
+	id := c.Params.ByName("id")
+	loggedUser, err := helpers.GetUserFromContext(c)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "an error occurred when trying to get user"})
+		return
+	}
+
+	if loggedUser.ID.String() != id {
+		c.JSON(http.StatusForbidden, gin.H{"message": "access to this resource is forbidden"})
+		return
+	}
+
+	err = s.repo.DeleteUser(loggedUser)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "an error occurred when trying to delete user"})
+		return
+	}
+
+	c.SetCookie(constants.AuthCookieName, "", -1, "", "", false, true)
+	c.Status(http.StatusOK)
+	c.JSON(http.StatusOK, gin.H{"message": "user deleted successfully"})
 }
