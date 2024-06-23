@@ -13,6 +13,7 @@ func BikeHandler(router *gin.Engine, bikeService *services.BikeService) {
 		bikesRouter.Use(middlewares.AuthMiddleware())
 		{
 			bikesRouter.GET("/", bikeService.GetAllBikes)
+			bikesRouter.GET("/:id", bikeService.GetBikeByID)
 		}
 	}
 

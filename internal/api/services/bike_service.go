@@ -2,6 +2,7 @@ package services
 
 import (
 	"net/http"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
@@ -48,5 +49,28 @@ func (s *BikeService) CreateBike(c *gin.Context) {
 }
 
 func (s *BikeService) GetAllBikes(c *gin.Context) {
-	c.JSON(http.StatusOK, gin.H{"message": "not implemented"})
+	bikes, err := s.repo.GetAllBikes()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "an error occurrend when trying to get all bikes"})
+		return
+	}
+
+	c.JSON(http.StatusOK, bikes)
+}
+
+func (s *BikeService) GetBikeByID(c *gin.Context) {
+	id := c.Param("id")
+
+	bike, err := s.repo.GetBikeByID(id)
+	if err != nil {
+		if strings.Contains(err.Error(), "bike not found") {
+			c.JSON(http.StatusNotFound, gin.H{"message": err.Error()})
+			return
+		}
+
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "an error occurrend when trying to get bike"})
+		return
+	}
+
+	c.JSON(http.StatusOK, bike)
 }
