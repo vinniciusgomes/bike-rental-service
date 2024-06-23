@@ -7,8 +7,8 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
-	"github.com/vinniciusgomes/ebike-rental-service/internal/api/infrastructure/constants"
-	"github.com/vinniciusgomes/ebike-rental-service/internal/api/infrastructure/helpers"
+	"github.com/vinniciusgomes/ebike-rental-service/internal/api/constants"
+	"github.com/vinniciusgomes/ebike-rental-service/internal/api/helpers"
 	"github.com/vinniciusgomes/ebike-rental-service/internal/api/models"
 	"github.com/vinniciusgomes/ebike-rental-service/internal/api/repositories"
 	"golang.org/x/crypto/bcrypt"

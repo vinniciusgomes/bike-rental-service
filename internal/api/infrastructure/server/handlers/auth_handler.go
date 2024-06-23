@@ -20,10 +20,10 @@ func AuthHandler(router *gin.Engine, authService *services.AuthService) {
 			authRouter.POST("/register", authService.CreateUser)
 			authRouter.POST("/login", authService.Login)
 			authRouter.POST("/logout", authService.Logout)
-			authRouter.POST("/verify-account", authService.VerifyUser)      // TODO
-			authRouter.POST("/forgot-password", authService.ForgotPassword) // TODO
-			authRouter.POST("/reset-password", authService.ResetPassword)   // TODO
-			authRouter.POST("/refresh-token", authService.RefreshToken)     // TODO
+			authRouter.POST("/verify-account", authService.VerifyUser)           // TODO
+			authRouter.POST("/forgot-password", authService.ForgotPassword)      // TODO
+			authRouter.POST("/reset-password/:token", authService.ResetPassword) // TODO
+			authRouter.POST("/refresh-token", authService.RefreshToken)          // TODO
 		}
 	}
 }

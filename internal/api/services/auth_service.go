@@ -2,6 +2,7 @@ package services
 
 import (
 	"errors"
+	"fmt"
 	"net/http"
 	"os"
 	"time"
@@ -9,10 +10,11 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
-	"github.com/vinniciusgomes/ebike-rental-service/internal/api/infrastructure/constants"
-	"github.com/vinniciusgomes/ebike-rental-service/internal/api/infrastructure/helpers"
+	"github.com/vinniciusgomes/ebike-rental-service/internal/api/constants"
+	"github.com/vinniciusgomes/ebike-rental-service/internal/api/helpers"
 	"github.com/vinniciusgomes/ebike-rental-service/internal/api/models"
 	"github.com/vinniciusgomes/ebike-rental-service/internal/api/repositories"
+	"github.com/vinniciusgomes/ebike-rental-service/pkg"
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
 )
@@ -168,18 +170,128 @@ func (s *AuthService) Logout(c *gin.Context) {
 	c.Status(http.StatusOK)
 }
 
-// TODO: add forgot password
+// ForgotPassword handles the forgot password functionality for the AuthService.
+//
+// Parameters:
+// - c: a pointer to the gin.Context object for handling HTTP request and response.
+//
+// Returns: void
 func (s *AuthService) ForgotPassword(c *gin.Context) {
-	// Get email from body
-	// Send email with token
-	// Save token in db
-	c.Status(http.StatusOK)
+	var body struct {
+		Email string `json:"email" validate:"required,email"`
+	}
+
+	if err := c.BindJSON(&body); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "invalid email"})
+		return
+	}
+
+	if err := helpers.ValidateModel(body); err != nil {
+		c.JSON(http.StatusUnprocessableEntity, gin.H{"message": err.Error()})
+		return
+	}
+
+	user, err := s.repo.GetUserByEmail(body.Email)
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			c.JSON(http.StatusOK, map[string]interface{}{
+				"message": "email sent successfully",
+			})
+			return
+		}
+
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "an error occurred when trying to reset password"})
+		return
+	}
+
+	tokenString, err := helpers.GenerateSecureToken()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "an error occurred when trying to reset password"})
+		return
+	}
+
+	token := models.ValidationToken{
+		Token:     tokenString,
+		Type:      models.ForgotPasswordToken, // Usando o enum correto
+		Valid:     true,
+		UserID:    user.ID,
+		ExpiresAt: time.Now().Add(1 * time.Hour),
+	}
+
+	if err := s.repo.CreateValidationToken(&token); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "an error occurred when trying to reset password"})
+		return
+	}
+
+	resetURL := fmt.Sprintf("%s/reset-password/%s", os.Getenv("WEB_CLIENT_URL"), tokenString)
+	err = pkg.SendEmail([]string{user.Email}, "Reset Password", fmt.Sprintf("Click the link to reset your password: <a href='%s' target='_blank'>Reset Password</a>", resetURL))
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "an error occurred when trying to reset password"})
+		return
+	}
+
+	c.JSON(http.StatusOK, map[string]interface{}{
+		"message": "email sent",
+	})
 }
 
-// TODO: add reset password
+// ResetPassword handles the password reset functionality for the AuthService.
+//
+// Parameters:
+// - c: a pointer to the gin.Context object for handling HTTP request and response.
+// Returns: void
 func (s *AuthService) ResetPassword(c *gin.Context) {
-	// Get token and password from body
-	// Verify token
-	// Update password in db
-	c.Status(http.StatusOK)
+	tokenString := c.Param("token")
+
+	var body struct {
+		Password string `json:"password" gorm:"not null;size:100" validate:"required,min=1,max=100"`
+	}
+
+	if err := c.BindJSON(&body); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "invalid password"})
+		return
+	}
+
+	if err := helpers.ValidateModel(body); err != nil {
+		c.JSON(http.StatusUnprocessableEntity, gin.H{"message": err.Error()})
+		return
+	}
+
+	token, err := s.repo.GetValidationToken(tokenString)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "invalid or expired token"})
+		return
+	}
+
+	if !token.Valid || time.Now().After(token.ExpiresAt) {
+		token.Valid = false
+		if err := s.repo.DeleteValidationToken(token.Token); err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"message": "an error occurred when trying to reset password"})
+			return
+		}
+
+		c.JSON(http.StatusBadRequest, gin.H{"message": "invalid or expired token"})
+		return
+	}
+
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(body.Password), bcrypt.DefaultCost)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "an error occurred when trying to reset password"})
+		return
+	}
+
+	token.Valid = false
+	if err := s.repo.DeleteValidationToken(token.Token); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "an error occurred when trying to reset password"})
+		return
+	}
+
+	if err := s.repo.UpdatePassword(token.UserID, string(hashedPassword)); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "an error occurred when trying to reset password"})
+		return
+	}
+
+	c.JSON(http.StatusOK, map[string]interface{}{
+		"message": "password reset successful",
+	})
 }
