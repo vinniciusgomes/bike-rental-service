@@ -3,6 +3,7 @@ package services
 import (
 	"errors"
 	"fmt"
+	"log"
 	"net/http"
 	"os"
 	"time"
@@ -32,6 +33,32 @@ type AuthService struct {
 // - *AuthService: a pointer to the newly created AuthService struct.
 func NewAuthService(repo repositories.AuthRepository) *AuthService {
 	return &AuthService{repo: repo}
+}
+
+func (s *AuthService) sendVerificationEmail(user *models.User) error {
+	tokenString, err := helpers.GenerateSecureToken()
+	if err != nil {
+		return err
+	}
+
+	token := models.ValidationToken{
+		Token:     tokenString,
+		Type:      models.ValidationAccountToken,
+		Valid:     true,
+		UserID:    user.ID,
+		ExpiresAt: time.Now().Add(1 * time.Hour),
+	}
+
+	if err := s.repo.CreateValidationToken(&token); err != nil {
+		return err
+	}
+
+	validationURL := fmt.Sprintf("%s/verify-account/%s", os.Getenv("WEB_CLIENT_URL"), tokenString)
+	err = pkg.SendEmail([]string{user.Email}, "Verify account", fmt.Sprintf("Click the link to verify your account: <a href='%s' target='_blank'>Verify account</a>", validationURL))
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 // CreateUser creates a new user based on the information provided in the request body.
@@ -81,23 +108,9 @@ func (s *AuthService) CreateUser(c *gin.Context) {
 		return
 	}
 
-	// TODO: send email with token and save token in db
+	go s.sendVerificationEmail(user)
 
 	c.Status(http.StatusCreated)
-}
-
-// TODO: add verify user
-func (s *AuthService) VerifyUser(c *gin.Context) {
-	// Get token and email from body
-
-	// Verify token and email
-
-	// Validate token
-
-	// Update user for validate: true in db
-
-	// Return success
-	c.JSON(http.StatusOK, gin.H{"message": "verify user"})
 }
 
 // Login handles the login functionality for the AuthService.
@@ -132,6 +145,13 @@ func (s *AuthService) Login(c *gin.Context) {
 		return
 	}
 
+	if !user.Verified {
+		c.JSON(http.StatusUnauthorized, gin.H{"message": "user not verified"})
+
+		go s.sendVerificationEmail(user)
+		return
+	}
+
 	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(body.Password)); err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"message": "invalid email or password"})
 		return
@@ -154,9 +174,44 @@ func (s *AuthService) Login(c *gin.Context) {
 	c.Status(http.StatusOK)
 }
 
-// TODO: add refresh token
-func (s *AuthService) RefreshToken(c *gin.Context) {
-	c.Status(http.StatusOK)
+// VerifyUser verifies a user by checking the validity and expiration of a token.
+//
+// Parameters:
+// - c: a pointer to the gin.Context object for handling HTTP request and response.
+//
+// Returns: void
+func (s *AuthService) VerifyUser(c *gin.Context) {
+	token := c.Param("token")
+
+	validationToken, err := s.repo.GetValidationToken(token)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "invalid or expired token"})
+		return
+	}
+
+	if !validationToken.Valid || time.Now().After(validationToken.ExpiresAt) {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "invalid or expired token"})
+
+		return
+	}
+
+	if err = s.repo.DeleteValidationToken(token); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "an error occurred when trying to verify user"})
+		return
+	}
+
+	user, err := s.repo.GetUserByID(validationToken.UserID.String())
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "invalid or expired token"})
+		return
+	}
+
+	if err = s.repo.ValidateUser(user.ID.String()); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "an error occurred when trying to verify user"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "user verified successfully"})
 }
 
 // Logout handles the logout functionality for the AuthService.
@@ -212,7 +267,7 @@ func (s *AuthService) ForgotPassword(c *gin.Context) {
 
 	token := models.ValidationToken{
 		Token:     tokenString,
-		Type:      models.ForgotPasswordToken, // Usando o enum correto
+		Type:      models.ForgotPasswordToken,
 		Valid:     true,
 		UserID:    user.ID,
 		ExpiresAt: time.Now().Add(1 * time.Hour),
@@ -223,12 +278,13 @@ func (s *AuthService) ForgotPassword(c *gin.Context) {
 		return
 	}
 
-	resetURL := fmt.Sprintf("%s/reset-password/%s", os.Getenv("WEB_CLIENT_URL"), tokenString)
-	err = pkg.SendEmail([]string{user.Email}, "Reset Password", fmt.Sprintf("Click the link to reset your password: <a href='%s' target='_blank'>Reset Password</a>", resetURL))
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"message": "an error occurred when trying to reset password"})
-		return
-	}
+	go func() {
+		resetURL := fmt.Sprintf("%s/reset-password/%s", os.Getenv("WEB_CLIENT_URL"), tokenString)
+		err = pkg.SendEmail([]string{user.Email}, "Reset Password", fmt.Sprintf("Click the link to reset your password: <a href='%s' target='_blank'>Reset Password</a>", resetURL))
+		if err != nil {
+			log.Println(err)
+		}
+	}()
 
 	c.JSON(http.StatusOK, map[string]interface{}{
 		"message": "email sent",

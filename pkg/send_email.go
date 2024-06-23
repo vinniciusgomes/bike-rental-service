@@ -3,6 +3,7 @@ package pkg
 import (
 	"errors"
 	"fmt"
+	"log"
 	"os"
 
 	"github.com/resend/resend-go/v2"
@@ -42,7 +43,7 @@ func SendEmail(toEmail []string, subject string, body string) error {
 		return err
 	}
 
-	fmt.Println(sent.Id)
+	log.Printf("Email sent: %+v", sent)
 
 	return nil
 }

@@ -9,10 +9,12 @@ import (
 type AuthRepository interface {
 	CreateUser(user *models.User) error
 	GetUserByEmail(email string) (*models.User, error)
+	GetUserByID(id string) (*models.User, error)
 	UpdatePassword(userID uuid.UUID, newPassword string) error
 	CreateValidationToken(token *models.ValidationToken) error
 	GetValidationToken(token string) (*models.ValidationToken, error)
 	DeleteValidationToken(token string) error
+	ValidateUser(id string) error
 }
 
 type authRepositoryImp struct {
@@ -60,6 +62,23 @@ func (r *authRepositoryImp) GetUserByEmail(email string) (*models.User, error) {
 	var user models.User
 
 	if err := r.db.Where("email = ?", email).First(&user).Error; err != nil {
+		return nil, err
+	}
+
+	return &user, nil
+}
+
+// GetUserByID retrieves a user from the database based on their ID.
+//
+// Parameters:
+// - id: the ID of the user to retrieve.
+//
+// Returns:
+// - *models.User
+func (r *authRepositoryImp) GetUserByID(id string) (*models.User, error) {
+	var user models.User
+
+	if err := r.db.Where("id = ?", id).First(&user).Error; err != nil {
 		return nil, err
 	}
 
@@ -118,4 +137,15 @@ func (r *authRepositoryImp) UpdatePassword(userID uuid.UUID, newPassword string)
 // - error: an error if there was a problem deleting the token, or nil if the token was deleted successfully.
 func (r *authRepositoryImp) DeleteValidationToken(token string) error {
 	return r.db.Where("token = ?", token).Delete(&models.ValidationToken{}).Error
+}
+
+// ValidateUser updates the "validated" field of a user in the database.
+//
+// Parameters:
+// - id: a string representing the ID of the user to validate.
+//
+// Returns:
+// - error: an error if there was a problem updating the user, or nil if the user was updated successfully.
+func (r *authRepositoryImp) ValidateUser(id string) error {
+	return r.db.Where("id = ?", id).Model(&models.User{}).Update("verified", true).Error
 }
