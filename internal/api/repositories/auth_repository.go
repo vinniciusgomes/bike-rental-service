@@ -43,7 +43,6 @@ func NewAuthRepository(db *gorm.DB) AuthRepository {
 // - error: an error if there was a problem creating the user, or nil if the user was created successfully.
 func (r *authRepositoryImp) CreateUser(user *models.User) error {
 	if err := r.db.Create(user).Error; err != nil {
-
 		return err
 	}
 

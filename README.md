@@ -79,7 +79,7 @@ Uma aplicação para gerenciar o aluguel de bicicletas elétricas, onde usuário
 - `GET /v1/users/{id}/rentals`: Obter histórico de aluguéis de um usuário.
 
 #### Gerenciamento de bicicletas:
-- `POST /v1/admin/bikes`: Adicionar uma nova bicicleta.
+- `POST /v1/admin/bikes/new`: Adicionar uma nova bicicleta. ✅
 - `PUT /v1/admin/bikes/{id}`: Atualizar detalhes de uma bicicleta.
 - `DELETE /v1/admin/bikes/{id}`: Remover uma bicicleta.
 - `GET /v1/bikes`: Listar todas as bicicletas.
