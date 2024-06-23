@@ -6,6 +6,11 @@ import (
 	"github.com/vinniciusgomes/ebike-rental-service/internal/api/services"
 )
 
+// BikeHandler handles HTTP requests related to bikes using the provided router and BikeService.
+//
+// Parameters:
+// - router: a pointer to a gin.Engine object representing the HTTP router.
+// - bikeService: a pointer to a services.BikeService object providing the bike-related operations.
 func BikeHandler(router *gin.Engine, bikeService *services.BikeService) {
 	v1 := router.Group("/v1")
 	{
@@ -23,7 +28,9 @@ func BikeHandler(router *gin.Engine, bikeService *services.BikeService) {
 		adminRouter.Use(middlewares.AuthMiddleware())
 		adminRouter.Use(middlewares.AdminOnly())
 		{
-			adminRouter.POST("/new", bikeService.CreateBike)
+			adminRouter.POST("/", bikeService.CreateBike)
+			adminRouter.PUT("/:id", bikeService.UpdateBike)
+			adminRouter.DELETE("/:id", bikeService.DeleteBike)
 		}
 	}
 }
