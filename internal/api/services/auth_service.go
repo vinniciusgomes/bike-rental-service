@@ -79,7 +79,23 @@ func (s *AuthService) CreateUser(c *gin.Context) {
 		return
 	}
 
+	// TODO: send email with token and save token in db
+
 	c.Status(http.StatusCreated)
+}
+
+// TODO: add verify user
+func (s *AuthService) VerifyUser(c *gin.Context) {
+	// Get token and email from body
+
+	// Verify token and email
+
+	// Validate token
+
+	// Update user for validate: true in db
+
+	// Return success
+	c.JSON(http.StatusOK, gin.H{"message": "verify user"})
 }
 
 // Login handles the login functionality for the AuthService.
@@ -136,6 +152,11 @@ func (s *AuthService) Login(c *gin.Context) {
 	c.Status(http.StatusOK)
 }
 
+// TODO: add refresh token
+func (s *AuthService) RefreshToken(c *gin.Context) {
+	c.Status(http.StatusOK)
+}
+
 // Logout handles the logout functionality for the AuthService.
 //
 // Parameters:
@@ -147,5 +168,18 @@ func (s *AuthService) Logout(c *gin.Context) {
 	c.Status(http.StatusOK)
 }
 
-// TODO: add refresh token
-// TODO: add verify account
+// TODO: add forgot password
+func (s *AuthService) ForgotPassword(c *gin.Context) {
+	// Get email from body
+	// Send email with token
+	// Save token in db
+	c.Status(http.StatusOK)
+}
+
+// TODO: add reset password
+func (s *AuthService) ResetPassword(c *gin.Context) {
+	// Get token and password from body
+	// Verify token
+	// Update password in db
+	c.Status(http.StatusOK)
+}

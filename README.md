@@ -67,6 +67,9 @@ Uma aplicação para gerenciar o aluguel de bicicletas elétricas, onde usuário
 - `POST /v1/auth/login`: Autenticar um usuário. ✅
 - `POST /v1/auth/logout`: Deslogar um usuário. ✅
 - `POST /v1/auth/verify-account`: Verificar conta de usuário. 
+- `POST /v1/auth/refresh-token`: Atualiza validade do token da conta do usuário.
+- `POST /v1/auth/forgot-password`: Gera um token para o usuário recuperar a senha.
+- `POST /v1/auth/reset-password`: Cria uma nova senha para conta do usuário baseada no token de recuperação.
 
 #### Gerenciamento de usuários:
 - `GET /v1/admin/users`: Obter detalhes de todos os usuários. ✅

@@ -19,16 +19,16 @@ type UserService struct {
 }
 
 type UserResponseDTO struct {
-	ID        uuid.UUID `json:"id"`
-	Email     string    `json:"email"`
-	Name      string    `json:"name"`
-	Phone     string    `json:"phone"`
-	Image     string    `json:"image"`
-	Status    string    `json:"status"`
-	Role      string    `json:"role"`
-	Verified  bool      `json:"verified"`
-	CreatedAt time.Time `json:"created_at"`
-	UpdatedAt time.Time `json:"updated_at"`
+	ID        uuid.UUID             `json:"id"`
+	Email     string                `json:"email"`
+	Name      string                `json:"name"`
+	Phone     string                `json:"phone"`
+	Image     string                `json:"image"`
+	Status    models.UserStatusEnum `json:"status"`
+	Role      models.UserRoleEnum   `json:"role"`
+	Verified  bool                  `json:"verified"`
+	CreatedAt time.Time             `json:"created_at"`
+	UpdatedAt time.Time             `json:"updated_at"`
 }
 
 // NewUserService creates a new instance of the UserService struct.
@@ -53,24 +53,28 @@ func (s *UserService) GetAllUsers(c *gin.Context) {
 
 	if id := strings.TrimSpace(c.Query("id")); id != "" {
 		filters["id"] = id
-	} else if email := strings.TrimSpace(c.Query("email")); email != "" {
+	}
+	if email := strings.TrimSpace(c.Query("email")); email != "" {
 		filters["email"] = email
-	} else if name := strings.TrimSpace(c.Query("name")); name != "" {
+	}
+	if name := strings.TrimSpace(c.Query("name")); name != "" {
 		filters["name"] = name
-	} else if status := strings.TrimSpace(c.Query("status")); status != "" {
-		if status != models.UserStatusActive && status != models.UserStatusInactive {
+	}
+	if status := strings.TrimSpace(c.Query("status")); status != "" {
+		statusEnum := models.UserStatusEnum(status)
+		if statusEnum != models.UserStatusActive && statusEnum != models.UserStatusInactive {
 			c.JSON(http.StatusBadRequest, gin.H{"message": "invalid status"})
 			return
 		}
-
-		filters["status"] = status
-	} else if role := strings.TrimSpace(c.Query("role")); role != "" {
-		if role != models.UserRoleAdmin && role != models.UserRoleDefault {
+		filters["status"] = statusEnum
+	}
+	if role := strings.TrimSpace(c.Query("role")); role != "" {
+		roleEnum := models.UserRoleEnum(role)
+		if roleEnum != models.UserRoleAdmin && roleEnum != models.UserRoleDefault {
 			c.JSON(http.StatusBadRequest, gin.H{"message": "invalid role"})
 			return
 		}
-
-		filters["role"] = role
+		filters["role"] = roleEnum
 	}
 
 	users, err := s.repo.GetAllUsers(filters)
