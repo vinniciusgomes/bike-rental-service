@@ -27,7 +27,7 @@ func DatabaseInit() {
 		panic(e)
 	}
 
-	database.AutoMigrate(&models.ValidationToken{}, &models.User{}, &models.Bike{})
+	database.AutoMigrate(&models.ValidationToken{}, &models.User{}, &models.Bike{}, &models.Rental{})
 }
 
 // GetDatabaseInstance returns the database instance.

@@ -22,20 +22,10 @@ Uma aplicação para gerenciar o aluguel de bicicletas elétricas, onde usuário
 - Registro e remoção de bicicletas.
 - Atualização de status das bicicletas (disponível, em manutenção, alugado).
 
-#### Reservas e aluguéis:
+#### Aluguéis:
 - Localização de bicicletas disponíveis.
-- Reserva de bicicletas.
 - Início e término de aluguéis.
 - Cálculo automático de tarifas.
-  
-#### Avaliações e feedback:
-- Avaliação das bicicletas após o uso.
-- Comentários sobre o serviço.
-
-#### Relatórios e Estatísticas (para Administradores):
-- Relatórios de uso das bicicletas.
-- Estatísticas de aluguéis.
-- Relatórios de manutenção.
 
 ## Regras de negócio
 #### Cadastro e login:
@@ -51,14 +41,6 @@ Uma aplicação para gerenciar o aluguel de bicicletas elétricas, onde usuário
 - O aluguel começa quando o usuário desbloqueia a bicicleta.
 - O aluguel termina quando a bicicleta é devolvida a uma estação de devolução.
 - O custo do aluguel é calculado com base no tempo de uso.
-
-#### Avaliações e feedback:
-- Usuários podem avaliar bicicletas apenas após um aluguel.
-- Avaliações podem incluir uma nota de 1 a 5 estrelas e um comentário opcional.
-
-#### Manutenção de bicicletas:
-- Bicicletas com avaliações negativas ou relatórios de problemas são marcadas automaticamente para manutenção.
-- Administradores podem alterar o status da bicicleta para "em manutenção" e vice-versa.
 
 ## Requisitos técnicos
 ### Endpoints da API:
@@ -76,7 +58,6 @@ Uma aplicação para gerenciar o aluguel de bicicletas elétricas, onde usuário
 - `PUT /v1/users/{id}`: Atualizar detalhes de um usuário. ✅
 - `PUT /v1/users/{id}/password`: Atualizar a senha de um usuário. ✅
 - `DELETE /v1/users/{id}/delete`: Deletar a conta de um usuário. ✅
-- `GET /v1/users/{id}/rentals`: Obter histórico de aluguéis de um usuário.
 
 #### Gerenciamento de bicicletas:
 - `POST /v1/admin/bikes/`: Adicionar uma nova bicicleta. ✅
@@ -86,17 +67,10 @@ Uma aplicação para gerenciar o aluguel de bicicletas elétricas, onde usuário
 - `GET /v1/bikes/{id}`: Obter detalhes de uma bicicleta. ✅
 
 #### Reservas e aluguéis:
-- `POST /v1/bikes/{id}/reserve`: Reservar uma bicicleta.
-- `POST /v1/bikes/{id}/rent`: Iniciar o aluguel de uma bicicleta.
-- `POST /v1/bikes/{id}/return`: Finalizar o aluguel de uma bicicleta.
-
-#### Avaliações e feedback:
-- `POST /v1/bikes/{id}/review`: Avaliar uma bicicleta.
-- `GET /v1/bikes/{id}/reviews`: Obter avaliações de uma bicicleta.
-
-#### Relatórios e estatísticas:
-- `GET /v1/admin/reports`: Obter relatórios de uso.
-- `GET /v1/admin/statistics`: Obter estatísticas de aluguéis.
+- `POST /v1/rentals/rent/{bikeId}`: Iniciar o aluguel de uma bicicleta. ✅
+- `POST /v1/rentals/return/{rentalId}`: Finalizar o aluguel de uma bicicleta. ✅
+- `GET /v1/rentals/{userId}`: Lista os aluguéis do usuário. ✅
+- `GET /v1/admin/rentals`: Lista todos os aluguéis da plataforma. ✅
 
 ### Persistência de dados:
 - Banco de dados relacional: `PostgreSQL`.

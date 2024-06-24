@@ -57,11 +57,13 @@ func StartServer() error {
 	authService := services.NewAuthService(repositories.NewAuthRepository(config.GetDatabaseInstance()))
 	userService := services.NewUserService(repositories.NewUserRepository(config.GetDatabaseInstance()))
 	bikeService := services.NewBikeService(repositories.NewBikeRepository(config.GetDatabaseInstance()))
+	rentalService := services.NewRentalService(repositories.NewRentalRepository(config.GetDatabaseInstance()))
 
 	// Routes
 	handlers.AuthHandler(router, authService)
 	handlers.UserHandler(router, userService)
 	handlers.BikeHandler(router, bikeService)
+	handlers.RentalHandler(router, rentalService)
 
 	// Others routes
 	router.GET("/health", func(c *gin.Context) {

@@ -11,10 +11,10 @@ import (
 type BikeStatusEnum string
 
 const (
-	AVAILABLE    BikeStatusEnum = "available"
-	NOTAVAILABLE BikeStatusEnum = "notavailable"
-	BOOKED       BikeStatusEnum = "booked"
-	MAINTENANCE  BikeStatusEnum = "maintenance"
+	BIKE_STATUS_AVAILABLE    BikeStatusEnum = "available"
+	BIKE_STATUS_NOTAVAILABLE BikeStatusEnum = "notavailable"
+	BIKE_STATUS_BOOKED       BikeStatusEnum = "booked"
+	BIKE_STATUS_MAINTENANCE  BikeStatusEnum = "maintenance"
 )
 
 type Bike struct {
