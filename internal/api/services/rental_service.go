@@ -17,10 +17,29 @@ type RentalService struct {
 	repo repositories.RentalRepository
 }
 
+// NewRentalService creates a new instance of the RentalService struct.
+//
+// It takes a repositories.RentalRepository as a parameter and returns a pointer
+// to a RentalService.
+//
+// Parameters:
+// - repo: a repositories.RentalRepository object representing the rental repository.
+//
+// Returns:
+// - *RentalService: a pointer to a RentalService object.
 func NewRentalService(repo repositories.RentalRepository) *RentalService {
 	return &RentalService{repo: repo}
 }
 
+// CreateRental creates a new rental for a bike.
+//
+// It takes a gin.Context object as a parameter and returns nothing.
+//
+// Parameters:
+// - c: a gin.Context object representing the HTTP request and response.
+//
+// Returns:
+// - None.
 func (s *RentalService) CreateRental(c *gin.Context) {
 	bikeID := c.Param("bikeId")
 
@@ -67,6 +86,11 @@ func (s *RentalService) CreateRental(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"rental_id": rental.ID})
 }
 
+// ReturnBike handles the process of returning a rented bike.
+//
+// Parameters:
+// - c: a gin.Context object representing the HTTP request and response.
+// Return type(s): None.
 func (s *RentalService) ReturnBike(c *gin.Context) {
 	id := c.Param("rentalId")
 
@@ -126,6 +150,13 @@ func (s *RentalService) ReturnBike(c *gin.Context) {
 	})
 }
 
+// GetAllRentals retrieves all rentals.
+//
+// Parameters:
+// - c: a gin.Context object representing the HTTP request and response.
+//
+// Returns:
+// - None.
 func (s *RentalService) GetAllRentals(c *gin.Context) {
 	rentals, err := s.repo.GetAllRentals()
 	if err != nil {
@@ -136,6 +167,15 @@ func (s *RentalService) GetAllRentals(c *gin.Context) {
 	c.JSON(http.StatusOK, rentals)
 }
 
+// GetRentalByUserID retrieves rentals for a specific user.
+//
+// It takes a gin.Context object as a parameter and returns nothing.
+//
+// Parameters:
+// - c: a gin.Context object representing the HTTP request and response.
+//
+// Returns:
+// - None.
 func (s *RentalService) GetRentalByUserID(c *gin.Context) {
 	id := c.Param("userId")
 

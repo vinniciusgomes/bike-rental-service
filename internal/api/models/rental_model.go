@@ -7,6 +7,7 @@ import (
 	"gorm.io/gorm"
 )
 
+// RentalStatusEnum represents the status of a rental.
 type RentalStatusEnum string
 
 const (
