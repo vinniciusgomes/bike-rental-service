@@ -18,7 +18,7 @@ const (
 )
 
 type Bike struct {
-	ID           uuid.UUID      `json:"id" gorm:"type:uuid;primaryKey;not null;default:uuid_generate_v4();index"`
+	ID           uuid.UUID      `json:"id" gorm:"type:uuid;primaryKey;not null;index"`
 	Name         string         `json:"name" gorm:"not null;size:100;" validate:"required,min=1,max=100"`
 	Description  string         `json:"description" gorm:"not null;size:500;" validate:"required,min=1,max=500"`
 	PricePerHour float64        `json:"price_per_hour" gorm:"not null;" validate:"required"`

@@ -16,7 +16,7 @@ const (
 )
 
 type Rental struct {
-	ID        uuid.UUID        `json:"id" gorm:"type:uuid;primaryKey;not null;default:uuid_generate_v4();index" validate:"required,uuid4"`
+	ID        uuid.UUID        `json:"id" gorm:"type:uuid;primaryKey;not null;index" validate:"required,uuid4"`
 	UserID    uuid.UUID        `json:"user_id" gorm:"type:uuid;not null"`
 	BikeID    uuid.UUID        `json:"bike_id" gorm:"type:uuid;not null"`
 	StartTime time.Time        `json:"start_time" gorm:"not null"`
