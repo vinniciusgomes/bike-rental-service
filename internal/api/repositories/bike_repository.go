@@ -10,7 +10,7 @@ import (
 
 type BikeRepository interface {
 	CreateBike(bike *models.Bike) error
-	GetAllBikes() (*[]models.Bike, error)
+	GetAllBikes(limit int, offset int) (*[]models.Bike, error)
 	GetBikeByID(id string) (*models.Bike, error)
 	UpdateBike(bike *models.Bike) error
 	DeleteBike(id string) error
@@ -44,10 +44,11 @@ func (r *bikeRepositoryImp) CreateBike(bike *models.Bike) error {
 // GetAllBikes retrieves all bikes from the database.
 //
 // It returns a pointer to a slice of models.Bike and an error if any.
-func (r *bikeRepositoryImp) GetAllBikes() (*[]models.Bike, error) {
+func (r *bikeRepositoryImp) GetAllBikes(limit int, offset int) (*[]models.Bike, error) {
 	var bikes []models.Bike
 
-	err := r.db.Find(&bikes).Error
+	err := r.db.Limit(limit).
+		Offset(offset).Find(&bikes).Error
 	if err != nil {
 		return nil, err
 	}

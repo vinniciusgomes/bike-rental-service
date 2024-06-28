@@ -8,9 +8,9 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
-	"github.com/vinniciusgomes/ebike-rental-service/internal/api/helpers"
 	"github.com/vinniciusgomes/ebike-rental-service/internal/api/models"
 	"github.com/vinniciusgomes/ebike-rental-service/internal/api/repositories"
+	"github.com/vinniciusgomes/ebike-rental-service/internal/api/utils"
 )
 
 type RentalService struct {
@@ -43,7 +43,7 @@ func NewRentalService(repo repositories.RentalRepository) *RentalService {
 func (s *RentalService) CreateRental(c *gin.Context) {
 	bikeID := c.Param("bikeId")
 
-	loggedUser, err := helpers.GetUserFromContext(c)
+	loggedUser, err := utils.GetUserFromContext(c)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": "an error occurred when trying to get user"})
 		return
@@ -73,7 +73,7 @@ func (s *RentalService) CreateRental(c *gin.Context) {
 		Status:    models.RENTAL_STATUS_ACTIVE,
 	}
 
-	if err := helpers.ValidateModel(rental); err != nil {
+	if err := utils.ValidateModel(rental); err != nil {
 		c.JSON(http.StatusUnprocessableEntity, gin.H{"message": err.Error()})
 		return
 	}
@@ -94,7 +94,7 @@ func (s *RentalService) CreateRental(c *gin.Context) {
 func (s *RentalService) ReturnBike(c *gin.Context) {
 	id := c.Param("rentalId")
 
-	loggedUser, err := helpers.GetUserFromContext(c)
+	loggedUser, err := utils.GetUserFromContext(c)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": "an error occurred when trying to get user"})
 		return

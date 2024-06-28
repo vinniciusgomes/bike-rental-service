@@ -8,9 +8,9 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"github.com/vinniciusgomes/ebike-rental-service/internal/api/constants"
-	"github.com/vinniciusgomes/ebike-rental-service/internal/api/helpers"
 	"github.com/vinniciusgomes/ebike-rental-service/internal/api/models"
 	"github.com/vinniciusgomes/ebike-rental-service/internal/api/repositories"
+	"github.com/vinniciusgomes/ebike-rental-service/internal/api/utils"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -112,7 +112,7 @@ func (s *UserService) GetAllUsers(c *gin.Context) {
 // or a JSON error response if the user is not found or an error occurs.
 func (s *UserService) GetUserByID(c *gin.Context) {
 	id := c.Params.ByName("id")
-	loggedUser, err := helpers.GetUserFromContext(c)
+	loggedUser, err := utils.GetUserFromContext(c)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": "an error occurred when trying to get user"})
 		return
@@ -153,7 +153,7 @@ func (s *UserService) GetUserByID(c *gin.Context) {
 // Return type: None.
 func (s *UserService) UpdateUser(c *gin.Context) {
 	id := c.Params.ByName("id")
-	loggedUser, err := helpers.GetUserFromContext(c)
+	loggedUser, err := utils.GetUserFromContext(c)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": "an error occurred when trying to get user"})
 		return
@@ -176,7 +176,7 @@ func (s *UserService) UpdateUser(c *gin.Context) {
 		return
 	}
 
-	if err := helpers.ValidateModel(&body); err != nil {
+	if err := utils.ValidateModel(&body); err != nil {
 		c.JSON(http.StatusUnprocessableEntity, gin.H{"message": err.Error()})
 		return
 	}
@@ -203,7 +203,7 @@ func (s *UserService) UpdateUser(c *gin.Context) {
 // Return type: None.
 func (s *UserService) UpdatePassword(c *gin.Context) {
 	id := c.Params.ByName("id")
-	loggedUser, err := helpers.GetUserFromContext(c)
+	loggedUser, err := utils.GetUserFromContext(c)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": "an error occurred when trying to get user"})
 		return
@@ -224,7 +224,7 @@ func (s *UserService) UpdatePassword(c *gin.Context) {
 		return
 	}
 
-	if err := helpers.ValidateModel(&body); err != nil {
+	if err := utils.ValidateModel(&body); err != nil {
 		c.JSON(http.StatusUnprocessableEntity, gin.H{"message": err.Error()})
 		return
 	}
@@ -271,7 +271,7 @@ func (s *UserService) UpdatePassword(c *gin.Context) {
 // Return type: None.
 func (s *UserService) DeleteUser(c *gin.Context) {
 	id := c.Params.ByName("id")
-	loggedUser, err := helpers.GetUserFromContext(c)
+	loggedUser, err := utils.GetUserFromContext(c)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": "an error occurred when trying to get user"})
 		return

@@ -12,9 +12,9 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
 	"github.com/vinniciusgomes/ebike-rental-service/internal/api/constants"
-	"github.com/vinniciusgomes/ebike-rental-service/internal/api/helpers"
 	"github.com/vinniciusgomes/ebike-rental-service/internal/api/models"
 	"github.com/vinniciusgomes/ebike-rental-service/internal/api/repositories"
+	"github.com/vinniciusgomes/ebike-rental-service/internal/api/utils"
 	"github.com/vinniciusgomes/ebike-rental-service/pkg"
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
@@ -36,7 +36,7 @@ func NewAuthService(repo repositories.AuthRepository) *AuthService {
 }
 
 func (s *AuthService) sendVerificationEmail(user *models.User) error {
-	tokenString, err := helpers.GenerateSecureToken()
+	tokenString, err := utils.GenerateSecureToken()
 	if err != nil {
 		return err
 	}
@@ -85,7 +85,7 @@ func (s *AuthService) CreateUser(c *gin.Context) {
 	user.Status = models.UserStatusInactive
 	user.Verified = false
 
-	if err = helpers.ValidateModel(user); err != nil {
+	if err = utils.ValidateModel(user); err != nil {
 		c.JSON(http.StatusUnprocessableEntity, gin.H{"message": err.Error()})
 		return
 	}
@@ -130,7 +130,7 @@ func (s *AuthService) Login(c *gin.Context) {
 		return
 	}
 
-	if err := helpers.ValidateModel(&body); err != nil {
+	if err := utils.ValidateModel(&body); err != nil {
 		c.JSON(http.StatusUnprocessableEntity, gin.H{"message": err.Error()})
 		return
 	}
@@ -241,7 +241,7 @@ func (s *AuthService) ForgotPassword(c *gin.Context) {
 		return
 	}
 
-	if err := helpers.ValidateModel(body); err != nil {
+	if err := utils.ValidateModel(body); err != nil {
 		c.JSON(http.StatusUnprocessableEntity, gin.H{"message": err.Error()})
 		return
 	}
@@ -259,7 +259,7 @@ func (s *AuthService) ForgotPassword(c *gin.Context) {
 		return
 	}
 
-	tokenString, err := helpers.GenerateSecureToken()
+	tokenString, err := utils.GenerateSecureToken()
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": "an error occurred when trying to reset password"})
 		return
@@ -308,7 +308,7 @@ func (s *AuthService) ResetPassword(c *gin.Context) {
 		return
 	}
 
-	if err := helpers.ValidateModel(body); err != nil {
+	if err := utils.ValidateModel(body); err != nil {
 		c.JSON(http.StatusUnprocessableEntity, gin.H{"message": err.Error()})
 		return
 	}

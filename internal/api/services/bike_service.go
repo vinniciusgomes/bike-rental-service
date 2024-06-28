@@ -6,9 +6,9 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
-	"github.com/vinniciusgomes/ebike-rental-service/internal/api/helpers"
 	"github.com/vinniciusgomes/ebike-rental-service/internal/api/models"
 	"github.com/vinniciusgomes/ebike-rental-service/internal/api/repositories"
+	"github.com/vinniciusgomes/ebike-rental-service/internal/api/utils"
 )
 
 type BikeService struct {
@@ -43,7 +43,7 @@ func (s *BikeService) CreateBike(c *gin.Context) {
 
 	bike.ID = id
 
-	if err := helpers.ValidateModel(bike); err != nil {
+	if err := utils.ValidateModel(bike); err != nil {
 		c.JSON(http.StatusUnprocessableEntity, gin.H{"message": err.Error()})
 		return
 	}
@@ -64,7 +64,9 @@ func (s *BikeService) CreateBike(c *gin.Context) {
 // Return:
 // - None.
 func (s *BikeService) GetAllBikes(c *gin.Context) {
-	bikes, err := s.repo.GetAllBikes()
+	limit, offset := utils.GetPaginationParams(c)
+
+	bikes, err := s.repo.GetAllBikes(limit, offset)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": "an error occurrend when trying to get all bikes"})
 		return

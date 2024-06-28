@@ -4,8 +4,8 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/vinniciusgomes/ebike-rental-service/internal/api/helpers"
 	"github.com/vinniciusgomes/ebike-rental-service/internal/api/models"
+	"github.com/vinniciusgomes/ebike-rental-service/internal/api/utils"
 )
 
 // AdminOnly is a middleware function for Gin framework that restricts access to
@@ -21,7 +21,7 @@ import (
 func AdminOnly() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		// Retrieve the user from the context
-		loggedUser, err := helpers.GetUserFromContext(c)
+		loggedUser, err := utils.GetUserFromContext(c)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"message": "an error occurred when trying to get user"})
 			c.Abort()
