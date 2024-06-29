@@ -2,8 +2,10 @@ package server
 
 import (
 	"log"
+	"math"
 	"net/http"
 	"os"
+	"sync"
 
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
@@ -13,6 +15,53 @@ import (
 	"github.com/vinniciusgomes/ebike-rental-service/internal/api/repositories"
 	"github.com/vinniciusgomes/ebike-rental-service/internal/api/services"
 )
+
+// isPrime verifica se um número é primo.
+func isPrime(n int) bool {
+	if n <= 1 {
+		return false
+	}
+	for i := 2; i <= int(math.Sqrt(float64(n))); i++ {
+		if n%i == 0 {
+			return false
+		}
+	}
+	return true
+}
+
+// generatePrimes gera números primos dentro de um intervalo e os adiciona a um slice.
+func generatePrimes(start, end int, wg *sync.WaitGroup, primes *[]int) {
+	defer wg.Done() // Marca o trabalho como concluído quando a função termina.
+	for i := start; i <= end; i++ {
+		if isPrime(i) {
+			*primes = append(*primes, i) // Adiciona o número primo ao slice.
+		}
+	}
+}
+
+// cpuIntensiveTask é o handler que executa a tarefa intensiva de CPU.
+func cpuIntensiveTask(c *gin.Context) {
+	numWorkers := 4                         // Número de goroutines (trabalhadores) a serem usadas.
+	rangePerWorker := 10000000 / numWorkers // Intervalo de números para cada goroutine.
+	var wg sync.WaitGroup
+	primes := make([]int, 0) // Slice para armazenar os números primos.
+
+	// Inicia as goroutines para gerar números primos.
+	for i := 0; i < numWorkers; i++ {
+		start := i*rangePerWorker + 1
+		end := (i + 1) * rangePerWorker
+		wg.Add(1) // Incrementa o contador do WaitGroup.
+		go generatePrimes(start, end, &wg, &primes)
+	}
+
+	wg.Wait() // Espera todas as goroutines terminarem.
+
+	// Retorna a resposta em JSON.
+	c.JSON(http.StatusOK, gin.H{
+		"message": "Tarefa intensiva de CPU concluída",
+		"primes":  primes,
+	})
+}
 
 // StartServer starts the server with the provided configuration.
 //
@@ -71,6 +120,8 @@ func StartServer() error {
 			"message": "healthy",
 		})
 	})
+
+	router.GET("/cpu-intensive", cpuIntensiveTask)
 
 	// Start server
 	httpPort := os.Getenv("PORT")
