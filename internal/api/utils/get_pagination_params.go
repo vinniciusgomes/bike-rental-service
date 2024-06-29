@@ -1,7 +1,7 @@
 package utils
 
 import (
-	"fmt"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 )
@@ -11,11 +11,15 @@ func GetPaginationParams(c *gin.Context) (int, int) {
 	page := 1   // Default page
 
 	if l := c.Query("limit"); l != "" {
-		fmt.Sscan(l, &limit)
+		if parsedLimit, err := strconv.Atoi(l); err == nil {
+			limit = parsedLimit
+		}
 	}
 
-	if o := c.Query("page"); o != "" {
-		fmt.Sscan(o, &page)
+	if p := c.Query("page"); p != "" {
+		if parsedPage, err := strconv.Atoi(p); err == nil {
+			page = parsedPage
+		}
 	}
 
 	return limit, page

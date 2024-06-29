@@ -3,7 +3,7 @@ package services
 import (
 	"errors"
 	"fmt"
-	"log"
+	"log/slog"
 	"net/http"
 	"os"
 	"time"
@@ -35,10 +35,11 @@ func NewAuthService(repo repositories.AuthRepository) *AuthService {
 	return &AuthService{repo: repo}
 }
 
-func (s *AuthService) sendVerificationEmail(user *models.User) error {
+func (s *AuthService) sendVerificationEmail(user *models.User) {
 	tokenString, err := utils.GenerateSecureToken()
 	if err != nil {
-		return err
+		slog.Error("failed to generate token", "error", err)
+		return
 	}
 
 	token := models.ValidationToken{
@@ -50,15 +51,16 @@ func (s *AuthService) sendVerificationEmail(user *models.User) error {
 	}
 
 	if err := s.repo.CreateValidationToken(&token); err != nil {
-		return err
+		slog.Error("failed to create validation token", "error", err)
+		return
 	}
 
 	validationURL := fmt.Sprintf("%s/verify-account/%s", os.Getenv("WEB_CLIENT_URL"), tokenString)
 	err = pkg.SendEmail([]string{user.Email}, "Verify account", fmt.Sprintf("Click the link to verify your account: <a href='%s' target='_blank'>Verify account</a>", validationURL))
 	if err != nil {
-		return err
+		slog.Error("failed to send email", "error", err)
+		return
 	}
-	return nil
 }
 
 // CreateUser creates a new user based on the information provided in the request body.
@@ -282,7 +284,7 @@ func (s *AuthService) ForgotPassword(c *gin.Context) {
 		resetURL := fmt.Sprintf("%s/reset-password/%s", os.Getenv("WEB_CLIENT_URL"), tokenString)
 		err = pkg.SendEmail([]string{user.Email}, "Reset Password", fmt.Sprintf("Click the link to reset your password: <a href='%s' target='_blank'>Reset Password</a>", resetURL))
 		if err != nil {
-			log.Println(err)
+			slog.Error("failed to send email", "error", err)
 		}
 	}()
 

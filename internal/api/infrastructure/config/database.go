@@ -11,7 +11,7 @@ import (
 type Database *gorm.DB
 
 var database *gorm.DB
-var e error
+var err error
 
 // GetDatabase initializes a connection to the PostgreSQL database specified by the
 // "DATABASE_URL" environment variable and performs automatic migration of the
@@ -21,13 +21,16 @@ var e error
 // It does not return anything.
 // If there is an error opening the database connection, it panics.
 func DatabaseInit() {
-	database, e = gorm.Open(postgres.Open(os.Getenv("DATABASE_URL")), &gorm.Config{})
+	database, err = gorm.Open(postgres.Open(os.Getenv("DATABASE_URL")), &gorm.Config{})
 
-	if e != nil {
-		panic(e)
+	if err != nil {
+		panic(err)
 	}
 
-	database.AutoMigrate(&models.ValidationToken{}, &models.User{}, &models.Bike{}, &models.Rental{})
+	err = database.AutoMigrate(&models.ValidationToken{}, &models.User{}, &models.Bike{}, &models.Rental{})
+	if err != nil {
+		panic(err)
+	}
 }
 
 // GetDatabaseInstance returns the database instance.
