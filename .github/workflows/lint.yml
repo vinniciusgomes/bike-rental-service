@@ -21,6 +21,9 @@ jobs:
           cache: false
       - uses: actions/checkout@v3
 
+      - name: Set up Go module
+        run: go mod tidy
+
       - name: lint
         uses: golangci/golangci-lint-action@v3
         with:
