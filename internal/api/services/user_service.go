@@ -11,6 +11,7 @@ import (
 	"github.com/vinniciusgomes/ebike-rental-service/internal/api/models"
 	"github.com/vinniciusgomes/ebike-rental-service/internal/api/repositories"
 	"github.com/vinniciusgomes/ebike-rental-service/internal/api/utils"
+	"github.com/vinniciusgomes/ebike-rental-service/pkg"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -49,6 +50,12 @@ func NewUserService(repo repositories.UserRepository) *UserService {
 // Returns:
 // This function does not return anything. It sends a JSON response with the user information if successful or an error response if an error occurs.
 func (s *UserService) GetAllUsers(c *gin.Context) {
+	limit, page := utils.GetPaginationParams(c)
+	pagination := new(pkg.Pagination)
+
+	pagination.Limit = limit
+	pagination.Page = page
+
 	filters := make(map[string]interface{})
 
 	if id := strings.TrimSpace(c.Query("id")); id != "" {
@@ -77,7 +84,7 @@ func (s *UserService) GetAllUsers(c *gin.Context) {
 		filters["role"] = roleEnum
 	}
 
-	users, err := s.repo.GetAllUsers(filters)
+	users, pagination, err := s.repo.GetAllUsers(filters, *pagination)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": "an error occurred when trying to get users"})
 		return
@@ -99,7 +106,7 @@ func (s *UserService) GetAllUsers(c *gin.Context) {
 		})
 	}
 
-	c.JSON(http.StatusOK, response)
+	c.JSON(http.StatusOK, gin.H{"data": response, "pagination": pagination})
 }
 
 // GetUserByID retrieves a user by their ID.

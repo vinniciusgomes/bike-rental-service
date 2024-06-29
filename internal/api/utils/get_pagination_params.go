@@ -8,15 +8,15 @@ import (
 
 func GetPaginationParams(c *gin.Context) (int, int) {
 	limit := 10 // Default limit
-	offset := 0 // Default offset
+	page := 1   // Default page
 
 	if l := c.Query("limit"); l != "" {
 		fmt.Sscan(l, &limit)
 	}
 
-	if o := c.Query("offset"); o != "" {
-		fmt.Sscan(o, &offset)
+	if o := c.Query("page"); o != "" {
+		fmt.Sscan(o, &page)
 	}
 
-	return limit, offset
+	return limit, page
 }

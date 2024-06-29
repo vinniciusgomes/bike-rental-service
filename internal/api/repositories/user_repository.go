@@ -4,11 +4,12 @@ import (
 	"fmt"
 
 	"github.com/vinniciusgomes/ebike-rental-service/internal/api/models"
+	"github.com/vinniciusgomes/ebike-rental-service/pkg"
 	"gorm.io/gorm"
 )
 
 type UserRepository interface {
-	GetAllUsers(filters map[string]interface{}) (*[]models.User, error)
+	GetAllUsers(filters map[string]interface{}, pagination pkg.Pagination) (*[]models.User, *pkg.Pagination, error)
 	GetUserByID(id string) (*models.User, error)
 	UpdateUser(user *models.User) error
 	DeleteUser(user *models.User) error
@@ -54,7 +55,7 @@ func (r *userRepositoryImp) GetUserByID(id string) (*models.User, error) {
 //
 // Returns:
 // - *[]models.User
-func (r *userRepositoryImp) GetAllUsers(filters map[string]interface{}) (*[]models.User, error) {
+func (r *userRepositoryImp) GetAllUsers(filters map[string]interface{}, pagination pkg.Pagination) (*[]models.User, *pkg.Pagination, error) {
 	var users []models.User
 
 	query := r.db.Model(&models.User{})
@@ -66,11 +67,13 @@ func (r *userRepositoryImp) GetAllUsers(filters map[string]interface{}) (*[]mode
 		}
 	}
 
+	query = query.Scopes(pkg.Paginate(&models.User{}, &pagination, query))
+
 	if err := query.Find(&users).Error; err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
-	return &users, nil
+	return &users, &pagination, nil
 }
 
 // UpdateUser updates a user in the database.
