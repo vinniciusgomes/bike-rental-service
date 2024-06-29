@@ -52,9 +52,10 @@ func (r *userRepositoryImp) GetUserByID(id string) (*models.User, error) {
 // Parameters:
 //   - filters: a map of filters to apply to the query. The keys can be "email" or "name" to perform a case-insensitive
 //     search, or any other key to perform an exact match. The values are the filter values.
+//   - pagination: an instance of the pkg.Pagination struct containing pagination information.
 //
 // Returns:
-// - *[]models.User
+//   - *[]models.User
 func (r *userRepositoryImp) GetAllUsers(filters map[string]interface{}, pagination pkg.Pagination) (*[]models.User, *pkg.Pagination, error) {
 	var users []models.User
 

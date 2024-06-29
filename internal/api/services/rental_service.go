@@ -11,6 +11,7 @@ import (
 	"github.com/vinniciusgomes/ebike-rental-service/internal/api/models"
 	"github.com/vinniciusgomes/ebike-rental-service/internal/api/repositories"
 	"github.com/vinniciusgomes/ebike-rental-service/internal/api/utils"
+	"github.com/vinniciusgomes/ebike-rental-service/pkg"
 )
 
 type RentalService struct {
@@ -158,13 +159,19 @@ func (s *RentalService) ReturnBike(c *gin.Context) {
 // Returns:
 // - None.
 func (s *RentalService) GetAllRentals(c *gin.Context) {
-	rentals, err := s.repo.GetAllRentals()
+	limit, page := utils.GetPaginationParams(c)
+
+	pagination := new(pkg.Pagination)
+	pagination.Limit = limit
+	pagination.Page = page
+
+	rentals, pagination, err := s.repo.GetAllRentals(*pagination)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": "an error occurred when trying to get rentals"})
 		return
 	}
 
-	c.JSON(http.StatusOK, rentals)
+	c.JSON(http.StatusOK, gin.H{"data": rentals, "pagination": pagination})
 }
 
 // GetRentalByUserID retrieves rentals for a specific user.

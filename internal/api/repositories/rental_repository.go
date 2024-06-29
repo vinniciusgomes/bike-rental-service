@@ -5,13 +5,14 @@ import (
 	"fmt"
 
 	"github.com/vinniciusgomes/ebike-rental-service/internal/api/models"
+	"github.com/vinniciusgomes/ebike-rental-service/pkg"
 	"gorm.io/gorm"
 )
 
 type RentalRepository interface {
 	CreateRental(rental *models.Rental) error
 	GetBikeByID(id string) (*models.Bike, error)
-	GetAllRentals() (*[]models.Rental, error)
+	GetAllRentals(pagination pkg.Pagination) (*[]models.Rental, *pkg.Pagination, error)
 	GetRentalByUserID(id string) (*[]models.Rental, error)
 	GetRentalByID(id string) (*models.Rental, error)
 	UpdateBikeStatus(bikeID string, status models.BikeStatusEnum) error
@@ -80,16 +81,16 @@ func (r *rentalRepositoryImp) GetBikeByID(id string) (*models.Bike, error) {
 
 // GetAllRentals retrieves all rentals from the rental repository.
 //
-// It returns a pointer to a slice of models.Rental and an error if any.
-func (r *rentalRepositoryImp) GetAllRentals() (*[]models.Rental, error) {
+// It takes a pagination parameter of type pkg.Pagination and returns a pointer to a slice of models.Rental, a pointer to the pagination parameter, and an error if any.
+func (r *rentalRepositoryImp) GetAllRentals(pagination pkg.Pagination) (*[]models.Rental, *pkg.Pagination, error) {
 	var rentals []models.Rental
 
-	err := r.db.Find(&rentals).Error
+	err := r.db.Scopes(pkg.Paginate(&models.Rental{}, &pagination, r.db)).Find(&rentals).Error
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
-	return &rentals, nil
+	return &rentals, &pagination, nil
 }
 
 // GetRentalByUserID retrieves all rentals associated with a specific user ID.

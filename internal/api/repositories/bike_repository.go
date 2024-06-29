@@ -44,7 +44,12 @@ func (r *bikeRepositoryImp) CreateBike(bike *models.Bike) error {
 
 // GetAllBikes retrieves all bikes from the database.
 //
-// It returns a pointer to a slice of models.Bike and an error if any.
+// Parameters:
+// - pagination: a pkg.Pagination object representing the pagination settings.
+// Returns:
+// - *[]models.Bike: a pointer to a slice of models.Bike.
+// - *pkg.Pagination: a pointer to the pagination parameter.
+// - error: an error if any.
 func (r *bikeRepositoryImp) GetAllBikes(pagination pkg.Pagination) (*[]models.Bike, *pkg.Pagination, error) {
 	var bikes []models.Bike
 
