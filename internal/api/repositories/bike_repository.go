@@ -5,12 +5,13 @@ import (
 	"fmt"
 
 	"github.com/vinniciusgomes/ebike-rental-service/internal/api/models"
+	"github.com/vinniciusgomes/ebike-rental-service/pkg"
 	"gorm.io/gorm"
 )
 
 type BikeRepository interface {
 	CreateBike(bike *models.Bike) error
-	GetAllBikes(limit int, offset int) (*[]models.Bike, error)
+	GetAllBikes(pagination pkg.Pagination) (*[]models.Bike, *pkg.Pagination, error)
 	GetBikeByID(id string) (*models.Bike, error)
 	UpdateBike(bike *models.Bike) error
 	DeleteBike(id string) error
@@ -44,15 +45,15 @@ func (r *bikeRepositoryImp) CreateBike(bike *models.Bike) error {
 // GetAllBikes retrieves all bikes from the database.
 //
 // It returns a pointer to a slice of models.Bike and an error if any.
-func (r *bikeRepositoryImp) GetAllBikes(limit int, offset int) (*[]models.Bike, error) {
+func (r *bikeRepositoryImp) GetAllBikes(pagination pkg.Pagination) (*[]models.Bike, *pkg.Pagination, error) {
 	var bikes []models.Bike
 
-	err := r.db.Find(&bikes).Error
+	err := r.db.Scopes(pkg.Paginate(&models.Bike{}, &pagination, r.db)).Find(&bikes).Error
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
-	return &bikes, nil
+	return &bikes, &pagination, nil
 }
 
 // GetBikeByID retrieves a bike from the database by its ID.

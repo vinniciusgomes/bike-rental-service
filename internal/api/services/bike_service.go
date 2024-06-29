@@ -9,6 +9,7 @@ import (
 	"github.com/vinniciusgomes/ebike-rental-service/internal/api/models"
 	"github.com/vinniciusgomes/ebike-rental-service/internal/api/repositories"
 	"github.com/vinniciusgomes/ebike-rental-service/internal/api/utils"
+	"github.com/vinniciusgomes/ebike-rental-service/pkg"
 )
 
 type BikeService struct {
@@ -64,15 +65,19 @@ func (s *BikeService) CreateBike(c *gin.Context) {
 // Return:
 // - None.
 func (s *BikeService) GetAllBikes(c *gin.Context) {
-	limit, offset := utils.GetPaginationParams(c)
+	limit, page := utils.GetPaginationParams(c)
 
-	bikes, err := s.repo.GetAllBikes(limit, offset)
+	pagination := new(pkg.Pagination)
+	pagination.Limit = limit
+	pagination.Page = page
+
+	bikes, pagination, err := s.repo.GetAllBikes(*pagination)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": "an error occurrend when trying to get all bikes"})
 		return
 	}
 
-	c.JSON(http.StatusOK, bikes)
+	c.JSON(http.StatusOK, gin.H{"data": bikes, "pagination": pagination})
 }
 
 // GetBikeByID retrieves a bike by its ID from the BikeService repository and returns it in the response.
