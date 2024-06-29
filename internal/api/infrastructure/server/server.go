@@ -41,8 +41,8 @@ func generatePrimes(start, end int, wg *sync.WaitGroup, primes *[]int) {
 
 // cpuIntensiveTask é o handler que executa a tarefa intensiva de CPU.
 func cpuIntensiveTask(c *gin.Context) {
-	numWorkers := 4                         // Número de goroutines (trabalhadores) a serem usadas.
-	rangePerWorker := 10000000 / numWorkers // Intervalo de números para cada goroutine.
+	numWorkers := 4                        // Número de goroutines (trabalhadores) a serem usadas.
+	rangePerWorker := 1000000 / numWorkers // Intervalo de números para cada goroutine.
 	var wg sync.WaitGroup
 	primes := make([]int, 0) // Slice para armazenar os números primos.
 
