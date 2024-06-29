@@ -47,8 +47,7 @@ func (r *bikeRepositoryImp) CreateBike(bike *models.Bike) error {
 func (r *bikeRepositoryImp) GetAllBikes(limit int, offset int) (*[]models.Bike, error) {
 	var bikes []models.Bike
 
-	err := r.db.Limit(limit).
-		Offset(offset).Find(&bikes).Error
+	err := r.db.Find(&bikes).Error
 	if err != nil {
 		return nil, err
 	}
