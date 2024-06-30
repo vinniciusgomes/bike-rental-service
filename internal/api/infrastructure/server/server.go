@@ -52,6 +52,7 @@ func StartServer() error {
 	router.Use(gin.Logger())
 	router.Use(gin.Recovery())
 	router.Use(middlewares.CORSMiddleware())
+	router.Use(middlewares.PrometheusMiddleware())
 
 	// Services
 	authService := services.NewAuthService(repositories.NewAuthRepository(config.GetDatabaseInstance()))
@@ -71,6 +72,8 @@ func StartServer() error {
 			"message": "healthy",
 		})
 	})
+
+	router.GET("/metrics", middlewares.PrometheusHandler())
 
 	// Start server
 	httpPort := os.Getenv("PORT")
