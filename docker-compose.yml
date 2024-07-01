@@ -6,9 +6,32 @@ services:
       context: .
       dockerfile: Dockerfile
     ports:
-      - "${PORT}:8080"
+      - "8080:8080"
     env_file:
       - .env
     environment:
-      DB_PORT: ${DB_PORT}
+      DATABASE_URL: ${DATABASE_URL}
+      JWT_SECRET: ${JWT_SECRET}
+      RESEND_API_KEY: ${RESEND_API_KEY}
       GIN_MODE: ${GIN_MODE}
+
+  prometheus:
+    image: prom/prometheus
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+    ports:
+      - "9090:9090"
+    depends_on:
+      - app
+
+  grafana:
+    image: grafana/grafana
+    ports:
+      - "3000:3000"
+    depends_on:
+      - prometheus
+
+volumes:
+  prometheus_data:
